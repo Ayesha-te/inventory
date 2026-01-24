@@ -1,0 +1,196 @@
+/* Custom Theme Colors for Stockive - Clean, Modern, Startup-Ready */
+:root {
+  /* Primary Colors */
+  --primary-lime: #B7F000;
+  --primary-dark: #1E293B; /* Slate 800 instead of black */
+  --bg-light: #F8FAFC; /* Slate 50 */
+  --sidebar-bg: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --card-border: #E2E8F0; /* Slate 200 */
+  --graph-green: #65A30D;
+  --muted-text: #64748B; /* Slate 500 */
+  
+  /* Status Colors */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  
+  /* Standard tailwind-like scale */
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Base Styles */
+body {
+  background-color: var(--bg-light);
+  color: var(--primary-dark);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.theme-bg-primary {
+  background-color: var(--bg-light);
+}
+
+.theme-bg-secondary {
+  background-color: var(--sidebar-bg);
+}
+
+.theme-bg-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+
+.theme-bg-muted {
+  background-color: var(--gray-50);
+}
+
+.theme-text-primary {
+  color: var(--primary-dark);
+}
+
+.theme-text-secondary {
+  color: var(--muted-text);
+}
+
+.theme-text-accent {
+  color: var(--primary-lime);
+}
+
+/* Button Styles */
+.btn-primary {
+  background: var(--primary-lime);
+  color: #000000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--primary-dark);
+  border: 1px solid var(--card-border);
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--gray-50);
+}
+
+/* Card Styles */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--card-border);
+  transition: all 0.2s ease;
+  color: var(--primary-dark);
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Navigation Styles */
+.nav-item {
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--muted-text);
+}
+
+.nav-item:hover {
+  background: var(--gray-100);
+  color: var(--primary-dark);
+}
+
+.nav-item.active {
+  background: var(--primary-lime);
+  color: #000000;
+  font-weight: 600;
+}
+
+/* Header Styles */
+.header-title {
+  color: var(--primary-dark);
+  font-weight: 800;
+  font-size: 2.5rem;
+  margin: 0;
+  letter-spacing: -0.04em;
+}
+
+.header-subtitle {
+  color: var(--muted-text);
+  font-size: 1rem;
+  margin: 4px 0 0 0;
+  font-weight: 500;
+}
+
+/* Status Badges */
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-primary {
+  background: rgba(183, 240, 0, 0.15);
+  color: #7AA100;
+  border: 1px solid rgba(183, 240, 0, 0.3);
+}
+
+/* Form Styles */
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+  color: var(--primary-dark);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-lime);
+  box-shadow: 0 0 0 4px rgba(183, 240, 0, 0.1);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  font-size: 0.875rem;
+}
