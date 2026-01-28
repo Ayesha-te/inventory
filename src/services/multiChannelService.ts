@@ -22,7 +22,7 @@ import type {
   OrderFilters
 } from '../types/MultiChannelTypes';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://uneven-martina-sagiyqwgey-54535183.koyeb.app/';
 const ENHANCED_ORDERS_BASE = `${API_BASE_URL}/enhanced-orders`;
 
 // Helper function to get auth headers

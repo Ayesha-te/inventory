@@ -1,11 +1,11 @@
 /**
  * Comprehensive API service for the Inventory Management System
- * Integrates with backend at http://localhost:8000/
+ * Integrates with backend at https://uneven-martina-sagiyqwgey-54535183.koyeb.app/
  */
 
 // Configuration constants
 export const API_CONFIG = {
-  BASE_URL: 'http://localhost:8000',
+  BASE_URL: 'https://uneven-martina-sagiyqwgey-54535183.koyeb.app',
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,
