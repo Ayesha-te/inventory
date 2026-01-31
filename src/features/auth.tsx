@@ -295,8 +295,8 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
                   className="form-input"
                 >
                   <option value="BASIC">Basic</option>
-                  <option value="STANDARD">Standard</option>
-                  <option value="OTHER">Other</option>
+                  <option value="STARTER">Starter</option>
+                  <option value="PRO">Pro</option>
                 </select>
                 <p className="mt-1 text-[10px] theme-text-muted font-bold uppercase tracking-wider">
                   Select a tier to tailor your experience

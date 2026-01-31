@@ -81,7 +81,7 @@ export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: 
   ];
 
   // Add store-specific navigation
-  if (storeContext.isMultiStore && (plan === 'standard' || plan === 'other')) {
+  if (storeContext.isMultiStore && (plan === 'starter' || plan === 'pro')) {
     baseItems.push(
       { id: 'supermarket-overview', label: 'Store Overview', icon: '🏬' },
       { id: 'catalog', label: 'Multi-Store Catalog', icon: '📦' },
@@ -99,20 +99,20 @@ export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: 
   }
 
   // Tiered feature access
-  if (plan === 'other') {
+  if (plan === 'pro') {
     baseItems.push(
       { id: 'multi-channel-orders', label: 'Multi-Channel Orders', icon: '🌐' },
       { id: 'channel-management', label: 'Channel Management', icon: '🌐' },
-      { id: 'stock-management', label: 'Stock Management', icon: '📊' },
-      { id: 'warehouse-management', label: 'Warehouse Management', icon: '🏢' }
+      { id: 'warehouse-management', label: 'Warehouse Management', icon: '🏢' },
+      { id: 'clearance', label: 'Clearance & Liquidation', icon: '🏷️' }
     );
   }
 
-  if (plan === 'standard' || plan === 'other') {
+  if (plan === 'starter' || plan === 'pro') {
     baseItems.push(
-      { id: 'clearance', label: 'Clearance', icon: '🏷️' },
+      { id: 'stock-management', label: 'Advanced Stock Control', icon: '📊' },
       { id: 'barcode-demo', label: 'Barcodes & Tickets', icon: '🏷️' },
-      { id: 'analytics', label: 'Analytics', icon: '📈' },
+      { id: 'analytics', label: 'Analytics & Insights', icon: '📈' },
       { id: 'suppliers', label: 'Suppliers', icon: '🤝' },
       { id: 'purchase-orders', label: 'Purchase Orders', icon: '🧾' },
       { id: 'purchasing-reports', label: 'Purchasing Reports', icon: '📑' }
@@ -125,7 +125,7 @@ export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: 
   );
 
   // POS Sync restricted to higher tiers
-  if (plan === 'standard' || plan === 'other') {
+  if (plan === 'pro') {
     baseItems.push({ id: 'pos-sync', label: 'POS Sync', icon: '🔄' });
   }
 
