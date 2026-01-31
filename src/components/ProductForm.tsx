@@ -132,6 +132,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
     if (formData.sellingPrice <= 0) {
       errors.sellingPrice = 'Selling price must be greater than 0';
     }
+    if (formData.price < 0) {
+      errors.price = 'Display price cannot be negative';
+    }
     if (formData.quantity < 0) {
       errors.quantity = 'Quantity cannot be negative';
     }
@@ -147,12 +150,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
       if (initialProduct) {
         await onSave({
           ...formData,
-          id: initialProduct.id
+          id: initialProduct.id,
+          price: formData.price || formData.sellingPrice || 0
         });
       } else {
         const productData = {
           ...formData,
-          price: formData.price || formData.sellingPrice
+          price: formData.price > 0 ? formData.price : (formData.sellingPrice || 0)
         };
         
         if (addToAllStores && userStores.length > 1 && onMultiStoreSave) {
@@ -638,6 +642,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     value={formData.costPrice}
                     onChange={handleChange}
                     step="0.01"
+                    min="0"
                     className={`w-full px-6 pr-6 py-4 bg-slate-50 border ${fieldErrors.costPrice ? 'border-red-500' : 'border-slate-200'} rounded-2xl focus:ring-4 focus:ring-[#B7F000]/20 focus:border-[#B7F000] text-slate-900 font-bold outline-none transition-all`}
                   />
                 </div>
@@ -655,11 +660,30 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     value={formData.sellingPrice}
                     onChange={handleChange}
                     step="0.01"
+                    min="0"
                     className={`w-full px-6 pr-6 py-4 bg-slate-50 border ${fieldErrors.sellingPrice ? 'border-red-500' : 'border-slate-200'} rounded-2xl focus:ring-4 focus:ring-[#B7F000]/20 focus:border-[#B7F000] text-slate-900 font-bold outline-none transition-all`}
                   />
                 </div>
                 {fieldErrors.sellingPrice && (
                   <p className="mt-2 text-[10px] font-black text-red-500 uppercase tracking-widest ml-1">{fieldErrors.sellingPrice}</p>
+                )}
+              </div>
+
+              <div className="space-y-2.5">
+                <label className="block text-slate-400 font-black text-[10px] uppercase tracking-wider ml-1">DISPLAY PRICE</label>
+                <div className="relative group">
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
+                    step="0.01"
+                    min="0"
+                    className={`w-full px-6 pr-6 py-4 bg-slate-50 border ${fieldErrors.price ? 'border-red-500' : 'border-slate-200'} rounded-2xl focus:ring-4 focus:ring-[#B7F000]/20 focus:border-[#B7F000] text-slate-900 font-bold outline-none transition-all`}
+                  />
+                </div>
+                {fieldErrors.price && (
+                  <p className="mt-2 text-[10px] font-black text-red-500 uppercase tracking-widest ml-1">{fieldErrors.price}</p>
                 )}
               </div>
 
