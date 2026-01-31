@@ -45,6 +45,30 @@ function App() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedForBT, setSelectedForBT] = useState<string[]>([]);
+  const [initialPlan, setInitialPlan] = useState<string>('BASIC');
+
+  // Initial routing from URL query params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    const plan = params.get('plan');
+
+    if (plan) {
+      setInitialPlan(plan.toUpperCase());
+    }
+
+    if (mode === 'signup') {
+      setCurrentView('signup');
+    } else if (mode === 'login') {
+      setCurrentView('login');
+    }
+
+    // Clean up URL params to keep it clean after reading
+    if (mode || plan) {
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, []);
 
   // Authentication
   const handleLogin = async (email: string, password: string) => {
@@ -681,6 +705,7 @@ function App() {
               mode="login" 
               onAuthSuccess={(email, password) => handleLogin(email, password)}
               showSignupOption={() => setCurrentView('signup')}
+              initialPlan={initialPlan}
             />
           )}
           {currentView === 'signup' && (
@@ -688,6 +713,7 @@ function App() {
               mode="signup" 
               onAuthSuccess={(email, password, firstName, lastName, supermarketName, phone, address, subscriptionPlan) => handleSignup(email, password, firstName, lastName, supermarketName, phone, address, subscriptionPlan)}
               showLoginOption={() => setCurrentView('login')}
+              initialPlan={initialPlan}
             />
           )}
         </main>

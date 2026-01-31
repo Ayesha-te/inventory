@@ -6,6 +6,7 @@ interface AuthProps {
   onAuthSuccess: (...args: any[]) => Promise<void>;
   showSignupOption?: () => void;
   showLoginOption?: () => void;
+  initialPlan?: string;
 }
 
 // Parse backend error string into field-level messages and a general message.
@@ -85,14 +86,14 @@ function parseBackendError(err: any): { general: string; fields: Record<string, 
   return result;
 }
 
-const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, showLoginOption }) => {
+const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, showLoginOption, initialPlan }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [supermarketName, setSupermarketName] = useState('');
-  const [subscriptionPlan, setSubscriptionPlan] = useState('BASIC');
+  const [subscriptionPlan, setSubscriptionPlan] = useState(initialPlan || 'BASIC');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [error, setError] = useState(''); // general/non-field error
