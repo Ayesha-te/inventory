@@ -30,6 +30,7 @@ interface StockiveDashboardProps {
   onLogout: () => void;
   currentView: string;
   onViewChange: (view: any) => void;
+  navigationItems?: { id: string; label: string; icon: string | React.ReactNode }[];
   children?: React.ReactNode;
   products?: any[];
   supermarkets?: any[];
@@ -42,6 +43,7 @@ const StockiveDashboard: React.FC<StockiveDashboardProps> = ({
   onLogout, 
   currentView, 
   onViewChange,
+  navigationItems = [],
   children,
   products = [],
   supermarkets = [],
@@ -117,6 +119,14 @@ const StockiveDashboard: React.FC<StockiveDashboardProps> = ({
     }
   ];
 
+  // Map flat navigationItems into grouped navGroups
+  const allowedIds = navigationItems.map(item => item.id);
+  
+  const filteredNavGroups = navGroups.map(group => ({
+    ...group,
+    items: group.items.filter(item => allowedIds.includes(item.id))
+  })).filter(group => group.items.length > 0);
+
   return (
     <div className="flex h-screen bg-[#F8FAFC] text-[#1E293B] font-sans overflow-hidden">
       {/* Sidebar */}
@@ -127,7 +137,7 @@ const StockiveDashboard: React.FC<StockiveDashboardProps> = ({
         </div>
 
         <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar pb-8">
-          {navGroups.map((group, gIdx) => (
+          {filteredNavGroups.map((group, gIdx) => (
             <React.Fragment key={gIdx}>
               {gIdx > 0 && <div className="mx-4 my-6 h-px bg-slate-100" />}
               <div className="space-y-1">

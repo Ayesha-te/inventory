@@ -59,7 +59,7 @@ function App() {
           registrationDate: response.user.registration_date?.split('T')[0] || new Date().toISOString().split('T')[0],
           isVerified: response.user.is_verified || false,
           subscription: {
-            plan: response.user.subscription_plan?.toLowerCase() || 'free',
+            plan: response.user.subscription_plan?.toLowerCase() || 'basic',
             expiryDate: response.user.subscription_end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
           }
         };
@@ -74,7 +74,7 @@ function App() {
     }
   };
 
-  const handleSignup = async (email: string, password: string, firstName: string, lastName: string, supermarketName?: string, phone?: string, address?: string) => {
+  const handleSignup = async (email: string, password: string, firstName: string, lastName: string, supermarketName?: string, phone?: string, address?: string, subscriptionPlan?: string) => {
     try {
       const registrationData = {
         email,
@@ -85,7 +85,8 @@ function App() {
         phone: phone || '',
         address: address || '',
         company_name: supermarketName || '',
-        supermarket_name: supermarketName || ''
+        supermarket_name: supermarketName || '',
+        subscription_plan: subscriptionPlan || 'BASIC'
       };
 
       const response = await AuthService.register(registrationData);
@@ -98,7 +99,7 @@ function App() {
           registrationDate: response.user.registration_date?.split('T')[0] || new Date().toISOString().split('T')[0],
           isVerified: response.user.is_verified || false,
           subscription: {
-            plan: response.user.subscription_plan?.toLowerCase() || 'free',
+            plan: response.user.subscription_plan?.toLowerCase() || 'basic',
             expiryDate: response.user.subscription_end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
           }
         };
@@ -498,7 +499,7 @@ function App() {
 
   // Get store context and adaptive navigation
   const storeContext = analyzeStoreContext(supermarkets, currentUser);
-  const navigationItems = getNavigationItems(storeContext, isAuthenticated);
+  const navigationItems = getNavigationItems(storeContext, isAuthenticated, currentUser);
   console.log('Navigation Items:', navigationItems);
   console.log('isAuthenticated:', isAuthenticated);
   console.log('storeContext:', storeContext);
@@ -513,6 +514,7 @@ function App() {
         onLogout={handleLogout} 
         currentView={currentView}
         onViewChange={setCurrentView}
+        navigationItems={navigationItems}
       >
         {/* Authenticated Views Content */}
         {currentView === 'dashboard' && (
@@ -684,7 +686,7 @@ function App() {
           {currentView === 'signup' && (
             <Auth 
               mode="signup" 
-              onAuthSuccess={(email, password, firstName, lastName, supermarketName, phone, address) => handleSignup(email, password, firstName, lastName, supermarketName, phone, address)}
+              onAuthSuccess={(email, password, firstName, lastName, supermarketName, phone, address, subscriptionPlan) => handleSignup(email, password, firstName, lastName, supermarketName, phone, address, subscriptionPlan)}
               showLoginOption={() => setCurrentView('login')}
             />
           )}

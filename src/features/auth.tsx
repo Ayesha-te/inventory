@@ -92,6 +92,7 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [supermarketName, setSupermarketName] = useState('');
+  const [subscriptionPlan, setSubscriptionPlan] = useState('BASIC');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [error, setError] = useState(''); // general/non-field error
@@ -117,7 +118,7 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
           setIsLoading(false);
           return;
         }
-        await onAuthSuccess(email, password, firstName, lastName, supermarketName, phone, address);
+        await onAuthSuccess(email, password, firstName, lastName, supermarketName, phone, address, subscriptionPlan);
       } else {
         await onAuthSuccess(email, password);
       }
@@ -281,6 +282,26 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
                   />
                 </div>
               </div>
+
+              <div>
+                <label htmlFor="subscriptionPlan" className="form-label">Subscription Plan *</label>
+                <select
+                  id="subscriptionPlan"
+                  name="subscriptionPlan"
+                  required
+                  value={subscriptionPlan}
+                  onChange={e => setSubscriptionPlan(e.target.value)}
+                  className="form-input"
+                >
+                  <option value="BASIC">Basic</option>
+                  <option value="STANDARD">Standard</option>
+                  <option value="OTHER">Other</option>
+                </select>
+                <p className="mt-1 text-[10px] theme-text-muted font-bold uppercase tracking-wider">
+                  Select a tier to tailor your experience
+                </p>
+              </div>
+
               <div>
                 <label htmlFor="address" className="form-label">Location Address</label>
                 <textarea

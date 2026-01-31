@@ -60,15 +60,17 @@ export const getStoreDisplayName = (store: Supermarket): string => {
 };
 
 /**
- * Get navigation items based on store context
+ * Get navigation items based on store context and user plan
  */
-export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: boolean) => {
+export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: boolean, currentUser: User | null) => {
   if (!isAuthenticated) {
     return [
       { id: 'login', label: 'Login', icon: '🔑' },
       { id: 'signup', label: 'Sign Up', icon: '📝' }
     ];
   }
+
+  const plan = currentUser?.subscription?.plan?.toLowerCase() || 'basic';
 
   const baseItems = [
     { 
@@ -84,7 +86,7 @@ export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: 
   ];
 
   // Add store-specific navigation
-  if (storeContext.isMultiStore) {
+  if (storeContext.isMultiStore && (plan === 'standard' || plan === 'other')) {
     baseItems.push(
       { id: 'supermarket-overview', label: 'Store Overview', icon: '🏬' },
       { id: 'catalog', label: 'Multi-Store Catalog', icon: '📦' },
@@ -99,20 +101,38 @@ export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: 
     );
   }
 
-  // Common items for both single and multi-store
+  // Tiered feature access
+  if (plan === 'other') {
+    baseItems.push(
+      { id: 'multi-channel-orders', label: 'Multi-Channel Orders', icon: '🌐' },
+      { id: 'channel-management', label: 'Channel Management', icon: '🌐' },
+      { id: 'stock-management', label: 'Stock Management', icon: '📊' },
+      { id: 'warehouse-management', label: 'Warehouse Management', icon: '🏢' }
+    );
+  }
+
+  if (plan === 'standard' || plan === 'other') {
+    baseItems.push(
+      { id: 'clearance', label: 'Clearance', icon: '🏷️' },
+      { id: 'barcode-demo', label: 'Barcodes & Tickets', icon: '🏷️' },
+      { id: 'analytics', label: 'Analytics', icon: '📈' },
+      { id: 'suppliers', label: 'Suppliers', icon: '🤝' },
+      { id: 'purchase-orders', label: 'Purchase Orders', icon: '🧾' },
+      { id: 'purchasing-reports', label: 'Purchasing Reports', icon: '📑' }
+    );
+  }
+
+  // Common items for all tiers
   baseItems.push(
-    { id: 'multi-channel-orders', label: 'Multi-Channel Orders', icon: '🌐' },
-    { id: 'channel-management', label: 'Channel Management', icon: '🌐' },
-    { id: 'stock-management', label: 'Stock Management', icon: '📊' },
-    { id: 'warehouse-management', label: 'Warehouse Management', icon: '🏢' },
-    { id: 'clearance', label: 'Clearance', icon: '🏷️' },
-    { id: 'barcode-demo', label: 'Barcodes & Tickets', icon: '🏷️' },
-    { id: 'scanner', label: 'Scanner', icon: '📱' },
-    { id: 'pos-sync', label: 'POS Sync', icon: '🔄' },
-    { id: 'analytics', label: 'Analytics', icon: '📈' },
-    { id: 'suppliers', label: 'Suppliers', icon: '🤝' },
-    { id: 'purchase-orders', label: 'Purchase Orders', icon: '🧾' },
-    { id: 'purchasing-reports', label: 'Purchasing Reports', icon: '📑' },
+    { id: 'scanner', label: 'Scanner', icon: '📱' }
+  );
+
+  // POS Sync restricted to higher tiers
+  if (plan === 'standard' || plan === 'other') {
+    baseItems.push({ id: 'pos-sync', label: 'POS Sync', icon: '🔄' });
+  }
+
+  baseItems.push(
     { id: 'settings', label: 'Settings', icon: '⚙️' }
   );
 

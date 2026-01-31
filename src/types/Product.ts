@@ -60,7 +60,7 @@ interface UserInterface {
   address?: string;
   phone?: string;
   subscription?: {
-    plan: 'free' | 'basic' | 'premium';
+    plan: 'basic' | 'standard' | 'other';
     expiryDate?: string;
   };
 }
