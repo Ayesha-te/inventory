@@ -87,7 +87,9 @@ const StockiveDashboard: React.FC<StockiveDashboardProps> = ({
       title: 'Discover',
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+        { id: 'supermarket-overview', label: 'Store Overview', icon: <ArrowUpRight size={18} /> },
         { id: 'stores', label: 'My Stores', icon: <Store size={18} /> },
+        { id: 'stockive-dashboard', label: 'Stockive UI', icon: <Plus size={18} /> },
       ]
     },
     {
@@ -98,6 +100,16 @@ const StockiveDashboard: React.FC<StockiveDashboardProps> = ({
         { id: 'orders', label: 'Orders', icon: <ShoppingCart size={18} /> },
         { id: 'multi-channel-orders', label: 'Multi-Channel', icon: <Layers size={18} /> },
         { id: 'clearance', label: 'Clearance', icon: <MoreHorizontal size={18} /> },
+        { id: 'stock-management', label: 'Stock Control', icon: <Package size={18} /> },
+        { id: 'warehouse-management', label: 'Warehouse', icon: <Store size={18} /> },
+      ]
+    },
+    {
+      title: 'Procurement',
+      items: [
+        { id: 'suppliers', label: 'Suppliers', icon: <Users size={18} /> },
+        { id: 'purchase-orders', label: 'Purchase Orders', icon: <CreditCard size={18} /> },
+        { id: 'purchasing-reports', label: 'Procurement Reports', icon: <BarChart3 size={18} /> },
       ]
     },
     {
@@ -107,7 +119,7 @@ const StockiveDashboard: React.FC<StockiveDashboardProps> = ({
         { id: 'scanner', label: 'Scanner', icon: <Maximize2 size={18} /> },
         { id: 'pos-sync', label: 'POS Sync', icon: <Truck size={18} /> },
         { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
-        { id: 'suppliers', label: 'Suppliers', icon: <Users size={18} /> },
+        { id: 'channel-management', label: 'Channel Mgmt', icon: <Layers size={18} /> },
       ]
     },
     {

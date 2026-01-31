@@ -91,12 +91,14 @@ export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: 
       { id: 'supermarket-overview', label: 'Store Overview', icon: '🏬' },
       { id: 'catalog', label: 'Multi-Store Catalog', icon: '📦' },
       { id: 'add-product', label: 'Add Products', icon: '➕' },
+      { id: 'orders', label: 'Orders', icon: '📋' },
       { id: 'stores', label: 'Store Management', icon: '🏪' }
     );
   } else {
     baseItems.push(
       { id: 'catalog', label: 'Product Catalog', icon: '📦' },
       { id: 'add-product', label: 'Add Product', icon: '➕' },
+      { id: 'orders', label: 'Orders', icon: '📋' },
       { id: 'stores', label: 'Store Settings', icon: '🏪' }
     );
   }
@@ -133,7 +135,8 @@ export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: 
   }
 
   baseItems.push(
-    { id: 'settings', label: 'Settings', icon: '⚙️' }
+    { id: 'settings', label: 'Settings', icon: '⚙️' },
+    { id: 'help', label: 'Help & Support', icon: '❓' }
   );
 
   return baseItems;

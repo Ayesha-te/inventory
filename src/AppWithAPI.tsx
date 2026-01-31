@@ -22,7 +22,8 @@ import MultiChannelOrders from './components/MultiChannelOrders';
 import HelpPage from './components/HelpPage';
 import logoImage from './assets/logo.png';
 
-import type { Product, User } from './types/Product';
+import { analyzeStoreContext, getNavigationItems } from './utils/storeUtils';
+import type { Product, User, Supermarket } from './types/Product';
 
 // Main App Content Component
 const AppContent: React.FC = () => {
@@ -323,22 +324,9 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // Navigation items
-  const navigationItems = isAuthenticated ? [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'catalog', label: 'Products', icon: '📦' },
-    { id: 'add-product', label: 'Add Products', icon: '➕' },
-    { id: 'orders', label: 'Orders', icon: '📋' },
-    { id: 'multi-channel-orders', label: 'Multi-Channel Orders', icon: '🌐' },
-    { id: 'clearance', label: 'Clearance', icon: '🏷️' },
-    { id: 'barcode-demo', label: 'Barcodes & Tickets', icon: '🏷️' },
-    { id: 'scanner', label: 'Scanner', icon: '📱' },
-    { id: 'stores', label: 'My Stores', icon: '🏪' },
-    { id: 'pos-sync', label: 'POS Sync', icon: '🔄' },
-    { id: 'analytics', label: 'Analytics', icon: '📈' },
-    { id: 'suppliers', label: 'Suppliers', icon: '🤝' },
-    { id: 'settings', label: 'Settings', icon: '⚙️' }
-  ] : [];
+  // Get store context and adaptive navigation
+  const storeContext = analyzeStoreContext((supermarkets || []) as Supermarket[], user as User);
+  const navigationItems = getNavigationItems(storeContext, isAuthenticated, user as User);
   
   // Small helper to allow in-app links to switch tabs
   const navigate = (viewId: typeof currentView) => setCurrentView(viewId);
@@ -374,6 +362,7 @@ const AppContent: React.FC = () => {
           setCurrentView(view);
           setEditingProduct(null);
         }}
+        navigationItems={navigationItems}
         products={products || []}
         supermarkets={supermarkets || []}
         searchQuery={searchQuery}

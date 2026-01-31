@@ -21,6 +21,7 @@ import DashboardGraphs from './components/DashboardGraphs';
 import BarcodeTicketManager from './components/BarcodeTicketManager';
 import StockiveDashboard from './components/StockiveDashboard';
 
+import HelpPage from './components/HelpPage';
 import ClearancePage from './components/ClearancePage';
 import MultiChannelOrders from './components/MultiChannelOrders';
 import ChannelManagement from './components/ChannelManagement';
@@ -681,8 +682,16 @@ function App() {
           <MultiChannelOrders />
         )}
 
+        {currentView === 'clearance' && (
+          <ClearancePage />
+        )}
+
         {currentView === 'settings' && (
           <Settings />
+        )}
+
+        {currentView === 'help' && (
+          <HelpPage />
         )}
       </StockiveDashboard>
     );
