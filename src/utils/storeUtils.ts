@@ -74,11 +74,6 @@ export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: 
 
   const baseItems = [
     { 
-      id: 'stockive-dashboard', 
-      label: 'Stockive UI', 
-      icon: '✨' 
-    },
-    { 
       id: 'dashboard', 
       label: storeContext.isMultiStore ? 'Multi-Store Dashboard' : 'Dashboard', 
       icon: '📊' 

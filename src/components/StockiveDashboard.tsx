@@ -89,7 +89,6 @@ const StockiveDashboard: React.FC<StockiveDashboardProps> = ({
         { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
         { id: 'supermarket-overview', label: 'Store Overview', icon: <ArrowUpRight size={18} /> },
         { id: 'stores', label: 'My Stores', icon: <Store size={18} /> },
-        { id: 'stockive-dashboard', label: 'Stockive UI', icon: <Plus size={18} /> },
       ]
     },
     {

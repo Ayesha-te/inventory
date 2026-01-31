@@ -37,7 +37,7 @@ import type { Product, Supermarket, User } from './types/Product';
 
 
 function App() {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'stockive-dashboard' | 'supermarket-overview' | 'scanner' | 'add-product' | 'stores' | 'catalog' | 'analytics' | 'pos-sync' | 'settings' | 'barcode-demo' | 'suppliers' | 'purchase-orders' | 'purchasing-reports' | 'clearance' | 'multi-channel-orders' | 'channel-management' | 'stock-management' | 'warehouse-management' | 'login' | 'signup'>('login');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'supermarket-overview' | 'scanner' | 'add-product' | 'stores' | 'catalog' | 'analytics' | 'pos-sync' | 'settings' | 'barcode-demo' | 'suppliers' | 'purchase-orders' | 'purchasing-reports' | 'clearance' | 'multi-channel-orders' | 'channel-management' | 'stock-management' | 'warehouse-management' | 'login' | 'signup'>('login');
   const [products, setProducts] = useState<Product[]>([]);
   const [supermarkets, setSupermarkets] = useState<Supermarket[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -91,7 +91,7 @@ function App() {
 
         setCurrentUser(user);
         setIsAuthenticated(true);
-        setCurrentView('stockive-dashboard');
+        setCurrentView('dashboard');
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -172,7 +172,7 @@ function App() {
           }
         }
 
-        setCurrentView('stockive-dashboard');
+        setCurrentView('dashboard');
       }
     } catch (error) {
       console.error('Registration failed:', error);
@@ -580,7 +580,6 @@ function App() {
           </div>
         )}
 
-        {currentView === 'stockive-dashboard' && null /* The dashboard content is built into the shell for this view */}
 
         {currentView === 'supermarket-overview' && currentUser && (
           <SupermarketDashboardView
