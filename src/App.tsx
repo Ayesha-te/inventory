@@ -33,11 +33,15 @@ import { ProductService, CategoryService, SupplierService, SupermarketService, A
 import { analyzeStoreContext, getNavigationItems } from './utils/storeUtils';
 import { getSuppliersWithFallback } from './data/demoData';
 import DebugStoreInfo from './components/DebugStoreInfo';
+import UpgradeModal from './components/UpgradeModal';
 import type { Product, Supermarket, User } from './types/Product';
 
 
+type View = 'dashboard' | 'supermarket-overview' | 'scanner' | 'add-product' | 'stores' | 'catalog' | 'analytics' | 'pos-sync' | 'settings' | 'barcode-demo' | 'suppliers' | 'purchase-orders' | 'purchasing-reports' | 'clearance' | 'multi-channel-orders' | 'channel-management' | 'stock-management' | 'warehouse-management' | 'login' | 'signup';
+
+
 function App() {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'supermarket-overview' | 'scanner' | 'add-product' | 'stores' | 'catalog' | 'analytics' | 'pos-sync' | 'settings' | 'barcode-demo' | 'suppliers' | 'purchase-orders' | 'purchasing-reports' | 'clearance' | 'multi-channel-orders' | 'channel-management' | 'stock-management' | 'warehouse-management' | 'login' | 'signup'>('login');
+  const [currentView, setCurrentView] = useState<View>('login');
   const [products, setProducts] = useState<Product[]>([]);
   const [supermarkets, setSupermarkets] = useState<Supermarket[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -47,6 +51,54 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedForBT, setSelectedForBT] = useState<string[]>([]);
   const [initialPlan, setInitialPlan] = useState<string>('BASIC');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeModalContent, setUpgradeModalContent] = useState({ featureName: '', requiredPlan: '' });
+
+  // --- Plan-Based Feature Control ---
+  const isViewAllowed = (view: View, plan: string): { allowed: boolean; requiredPlan?: string } => {
+    const planToNumber = (p: string) => {
+      if (p === 'pro') return 3;
+      if (p === 'starter') return 2;
+      return 1; // basic
+    };
+
+    const requiredLevels: { [key in View]?: number } = {
+      'stores': 2,
+      'scanner': 2,
+      'barcode-demo': 2,
+      'orders': 2,
+      'suppliers': 2,
+      'stock-management': 2,
+      'pos-sync': 3,
+      'clearance': 3,
+      'multi-channel-orders': 3,
+    };
+
+    const requiredLevel = requiredLevels[view] || 1;
+    const userLevel = planToNumber(plan);
+
+    if (userLevel >= requiredLevel) {
+      return { allowed: true };
+    }
+
+    let requiredPlan = 'Starter';
+    if (requiredLevel === 3) requiredPlan = 'Pro';
+    
+    return { allowed: false, requiredPlan };
+  };
+
+  const handleViewChange = (view: View) => {
+    const plan = currentUser?.subscription?.plan || 'basic';
+    const { allowed, requiredPlan } = isViewAllowed(view, plan);
+  
+    if (allowed) {
+      setCurrentView(view);
+    } else {
+      const featureName = view.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      setUpgradeModalContent({ featureName, requiredPlan: requiredPlan! });
+      setShowUpgradeModal(true);
+    }
+  };
 
   // Initial routing from URL query params
   useEffect(() => {
@@ -91,7 +143,7 @@ function App() {
 
         setCurrentUser(user);
         setIsAuthenticated(true);
-        setCurrentView('dashboard');
+        handleViewChange('dashboard');
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -172,7 +224,7 @@ function App() {
           }
         }
 
-        setCurrentView('dashboard');
+        handleViewChange('dashboard');
       }
     } catch (error) {
       console.error('Registration failed:', error);
@@ -192,7 +244,7 @@ function App() {
       setSupermarkets([]);
       setCategories([]);
       setSuppliers([]);
-      setCurrentView('login');
+      handleViewChange('login');
     }
   };
 
@@ -386,7 +438,7 @@ function App() {
     } else {
       addProduct(product);
     }
-    setCurrentView('dashboard');
+    handleViewChange('dashboard');
     setEditingProduct(null);
   };
 
@@ -398,12 +450,24 @@ function App() {
       id: 'product-' + Date.now() + '-' + Math.random() + '-' + storeId
     }));
     setProducts(prev => [...prev, ...multiStoreProducts]);
-    setCurrentView('dashboard');
+    handleViewChange('dashboard');
     setEditingProduct(null);
   };
 
   // Store Management
   const addSupermarket = async (supermarket: Omit<Supermarket, 'id'>) => {
+    const plan = currentUser?.subscription?.plan || 'basic';
+    const currentStoreCount = supermarkets.length;
+
+    if (plan === 'basic' && currentStoreCount >= 1) {
+      alert('Your Basic plan allows for only 1 store. Please upgrade to add more stores.');
+      return;
+    }
+    if (plan === 'starter' && currentStoreCount >= 3) {
+      alert('Your Starter plan allows for up to 3 stores. Please upgrade to add more stores.');
+      return;
+    }
+
     try {
       console.log('Creating supermarket via API:', supermarket);
       
@@ -534,165 +598,173 @@ function App() {
 
   if (isAuthenticated) {
     return (
-      <StockiveDashboard 
-        user={currentUser} 
-        onLogout={handleLogout} 
-        currentView={currentView}
-        onViewChange={setCurrentView}
-        navigationItems={navigationItems}
-      >
-        {/* Authenticated Views Content */}
-        {currentView === 'dashboard' && (
-          <div className="space-y-8">
-            <DebugStoreInfo stores={supermarkets} currentUser={currentUser} />
-            <DashboardGraphs 
-              products={products} 
+      <>
+        <UpgradeModal 
+          show={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+          featureName={upgradeModalContent.featureName}
+          requiredPlan={upgradeModalContent.requiredPlan}
+        />
+        <StockiveDashboard 
+          user={currentUser} 
+          onLogout={handleLogout} 
+          currentView={currentView}
+          onViewChange={handleViewChange}
+          navigationItems={navigationItems}
+        >
+          {/* Authenticated Views Content */}
+          {currentView === 'dashboard' && (
+            <div className="space-y-8">
+              <DebugStoreInfo stores={supermarkets} currentUser={currentUser} />
+              <DashboardGraphs 
+                products={products} 
+                supermarkets={supermarkets}
+              />
+              {storeContext.isMultiStore ? (
+                <MultiStoreDashboard 
+                  products={products}
+                  stores={supermarkets}
+                  onEditProduct={(product) => {
+                    setEditingProduct(product);
+                    handleViewChange('add-product');
+                  }}
+                  onDeleteProduct={deleteProduct}
+                  onCopyProduct={(productId, targetStoreId) => {
+                    handleBulkProductAction('copy', [productId], targetStoreId);
+                  }}
+                  onMoveProduct={(productId, targetStoreId) => {
+                    handleBulkProductAction('move', [productId], targetStoreId);
+                  }}
+                />
+              ) : (
+                <Dashboard 
+                  products={products}
+                  supermarkets={supermarkets}
+                  onEditProduct={(product) => {
+                    setEditingProduct(product);
+                    handleViewChange('add-product');
+                  }}
+                  onDeleteProduct={deleteProduct}
+                  fallbackStoreName={primaryStore?.name}
+                />
+              )}
+            </div>
+          )}
+
+
+          {currentView === 'supermarket-overview' && currentUser && (
+            <SupermarketDashboardView
+              user={currentUser}
+              supermarkets={supermarkets}
+              products={products}
+              onViewSupermarket={(supermarketId) => {
+                console.log('View supermarket:', supermarketId);
+              }}
+              onManageSupermarket={(supermarketId) => {
+                handleViewChange('stores');
+              }}
+              onCreateSupermarket={() => {
+                handleViewChange('stores');
+              }}
+            />
+          )}
+
+          {currentView === 'scanner' && (
+            <ProductScanner products={products} />
+          )}
+
+          {currentView === 'add-product' && (
+            <div className="space-y-4">
+              <DebugStoreInfo stores={supermarkets} currentUser={currentUser} />
+              <AdaptiveProductForm
+                product={editingProduct}
+                stores={supermarkets}
+                categories={categories}
+                suppliers={suppliers}
+                currentUser={currentUser}
+                onSave={handleProductSave}
+                onCancel={() => {
+                  handleViewChange('dashboard');
+                  setEditingProduct(null);
+                }}
+                onDuplicateToStores={handleProductDuplication}
+                onMultiStoreSave={handleMultiStoreSave}
+              />
+            </div>
+          )}
+
+          {currentView === 'catalog' && (
+            <AdaptiveProductCatalog
+              products={products}
+              stores={supermarkets}
+              currentUser={currentUser}
+              onEditProduct={(product) => {
+                setEditingProduct(product);
+                handleViewChange('add-product');
+              }}
+              onDeleteProduct={deleteProduct}
+              onCopyProduct={(productId, targetStoreId) => {
+                handleBulkProductAction('copy', [productId], targetStoreId);
+              }}
+              onMoveProduct={(productId, targetStoreId) => {
+                handleBulkProductAction('move', [productId], targetStoreId);
+              }}
+              onBulkAction={handleMultiStoreBulkAction}
+            />
+          )}
+
+          {currentView === 'stores' && currentUser && (
+            <MyStores stores={supermarkets} onNavigateToStore={handleNavigateToStore} />
+          )}
+
+          {currentView === 'pos-sync' && (
+            <div className="bg-white rounded-3xl border border-gray-100 p-10 shadow-sm">
+              <h2 className="text-3xl font-black text-gray-800 mb-6">POS Synchronization</h2>
+              <POSSync 
+                supermarket={primaryStore ? primaryStore : supermarkets[0]}
+                onUpdatePOS={updatePOSConfig}
+              />
+            </div>
+          )}
+
+          {currentView === 'barcode-demo' && (
+            <div className="bg-white rounded-3xl border border-gray-100 p-10 shadow-sm">
+              <BarcodeTicketManager 
+                products={products}
+                selectedProducts={selectedForBT}
+                onSelectionChange={setSelectedForBT}
+              />
+            </div>
+          )}
+
+          {currentView === 'analytics' && (
+            <Analytics 
+              products={products}
               supermarkets={supermarkets}
             />
-            {storeContext.isMultiStore ? (
-              <MultiStoreDashboard 
-                products={products}
-                stores={supermarkets}
-                onEditProduct={(product) => {
-                  setEditingProduct(product);
-                  setCurrentView('add-product');
-                }}
-                onDeleteProduct={deleteProduct}
-                onCopyProduct={(productId, targetStoreId) => {
-                  handleBulkProductAction('copy', [productId], targetStoreId);
-                }}
-                onMoveProduct={(productId, targetStoreId) => {
-                  handleBulkProductAction('move', [productId], targetStoreId);
-                }}
-              />
-            ) : (
-              <Dashboard 
-                products={products}
-                supermarkets={supermarkets}
-                onEditProduct={(product) => {
-                  setEditingProduct(product);
-                  setCurrentView('add-product');
-                }}
-                onDeleteProduct={deleteProduct}
-                fallbackStoreName={primaryStore?.name}
-              />
-            )}
-          </div>
-        )}
+          )}
 
+          {currentView === 'suppliers' && (
+            <Suppliers />
+          )}
 
-        {currentView === 'supermarket-overview' && currentUser && (
-          <SupermarketDashboardView
-            user={currentUser}
-            supermarkets={supermarkets}
-            products={products}
-            onViewSupermarket={(supermarketId) => {
-              console.log('View supermarket:', supermarketId);
-            }}
-            onManageSupermarket={(supermarketId) => {
-              setCurrentView('stores');
-            }}
-            onCreateSupermarket={() => {
-              setCurrentView('stores');
-            }}
-          />
-        )}
+          {currentView === 'multi-channel-orders' && currentUser && (
+            <MultiChannelOrders />
+          )}
 
-        {currentView === 'scanner' && (
-          <ProductScanner products={products} />
-        )}
+          {currentView === 'clearance' && (
+            <ClearancePage />
+          )}
 
-        {currentView === 'add-product' && (
-          <div className="space-y-4">
-            <DebugStoreInfo stores={supermarkets} currentUser={currentUser} />
-            <AdaptiveProductForm
-              product={editingProduct}
-              stores={supermarkets}
-              categories={categories}
-              suppliers={suppliers}
-              currentUser={currentUser}
-              onSave={handleProductSave}
-              onCancel={() => {
-                setCurrentView('dashboard');
-                setEditingProduct(null);
-              }}
-              onDuplicateToStores={handleProductDuplication}
-              onMultiStoreSave={handleMultiStoreSave}
-            />
-          </div>
-        )}
+          {currentView === 'settings' && (
+            <Settings />
+          )}
 
-        {currentView === 'catalog' && (
-          <AdaptiveProductCatalog
-            products={products}
-            stores={supermarkets}
-            currentUser={currentUser}
-            onEditProduct={(product) => {
-              setEditingProduct(product);
-              setCurrentView('add-product');
-            }}
-            onDeleteProduct={deleteProduct}
-            onCopyProduct={(productId, targetStoreId) => {
-              handleBulkProductAction('copy', [productId], targetStoreId);
-            }}
-            onMoveProduct={(productId, targetStoreId) => {
-              handleBulkProductAction('move', [productId], targetStoreId);
-            }}
-            onBulkAction={handleMultiStoreBulkAction}
-          />
-        )}
-
-        {currentView === 'stores' && currentUser && (
-          <MyStores stores={supermarkets} onNavigateToStore={handleNavigateToStore} />
-        )}
-
-        {currentView === 'pos-sync' && (
-          <div className="bg-white rounded-3xl border border-gray-100 p-10 shadow-sm">
-            <h2 className="text-3xl font-black text-gray-800 mb-6">POS Synchronization</h2>
-            <POSSync 
-              supermarket={primaryStore ? primaryStore : supermarkets[0]}
-              onUpdatePOS={updatePOSConfig}
-            />
-          </div>
-        )}
-
-        {currentView === 'barcode-demo' && (
-          <div className="bg-white rounded-3xl border border-gray-100 p-10 shadow-sm">
-            <BarcodeTicketManager 
-              products={products}
-              selectedProducts={selectedForBT}
-              onSelectionChange={setSelectedForBT}
-            />
-          </div>
-        )}
-
-        {currentView === 'analytics' && (
-          <Analytics 
-            products={products}
-            supermarkets={supermarkets}
-          />
-        )}
-
-        {currentView === 'suppliers' && (
-          <Suppliers />
-        )}
-
-        {currentView === 'multi-channel-orders' && currentUser && (
-          <MultiChannelOrders />
-        )}
-
-        {currentView === 'clearance' && (
-          <ClearancePage />
-        )}
-
-        {currentView === 'settings' && (
-          <Settings />
-        )}
-
-        {currentView === 'help' && (
-          <HelpPage />
-        )}
-      </StockiveDashboard>
+          {currentView === 'help' && (
+            <HelpPage />
+          )}
+        </StockiveDashboard>
+      </>
     );
   }
 
@@ -712,7 +784,7 @@ function App() {
             <Auth 
               mode="login" 
               onAuthSuccess={(email, password) => handleLogin(email, password)}
-              showSignupOption={() => setCurrentView('signup')}
+              showSignupOption={() => handleViewChange('signup')}
               initialPlan={initialPlan}
             />
           )}
@@ -720,7 +792,7 @@ function App() {
             <Auth 
               mode="signup" 
               onAuthSuccess={(email, password, firstName, lastName, supermarketName, phone, address, subscriptionPlan) => handleSignup(email, password, firstName, lastName, supermarketName, phone, address, subscriptionPlan)}
-              showLoginOption={() => setCurrentView('login')}
+              showLoginOption={() => handleViewChange('login')}
               initialPlan={initialPlan}
             />
           )}

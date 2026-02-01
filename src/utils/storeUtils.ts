@@ -72,69 +72,56 @@ export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: 
 
   const plan = currentUser?.subscription?.plan?.toLowerCase() || 'basic';
 
-  const baseItems = [
+  // Base items for ALL plans
+  let navItems = [
     { 
       id: 'dashboard', 
-      label: storeContext.isMultiStore ? 'Multi-Store Dashboard' : 'Dashboard', 
+      label: 'Dashboard', 
       icon: '📊' 
-    }
-  ];
-
-  // Add store-specific navigation
-  if (storeContext.isMultiStore && (plan === 'starter' || plan === 'pro')) {
-    baseItems.push(
-      { id: 'supermarket-overview', label: 'Store Overview', icon: '🏬' },
-      { id: 'catalog', label: 'Multi-Store Catalog', icon: '📦' },
-      { id: 'add-product', label: 'Add Products', icon: '➕' },
-      { id: 'orders', label: 'Orders', icon: '📋' },
-      { id: 'stores', label: 'Store Management', icon: '🏪' }
-    );
-  } else {
-    baseItems.push(
-      { id: 'catalog', label: 'Product Catalog', icon: '📦' },
-      { id: 'add-product', label: 'Add Product', icon: '➕' },
-      { id: 'orders', label: 'Orders', icon: '📋' },
-      { id: 'stores', label: 'Store Settings', icon: '🏪' }
-    );
-  }
-
-  // Tiered feature access
-  if (plan === 'pro') {
-    baseItems.push(
-      { id: 'multi-channel-orders', label: 'Multi-Channel Orders', icon: '🌐' },
-      { id: 'channel-management', label: 'Channel Management', icon: '🌐' },
-      { id: 'warehouse-management', label: 'Warehouse Management', icon: '🏢' },
-      { id: 'clearance', label: 'Clearance & Liquidation', icon: '🏷️' }
-    );
-  }
-
-  if (plan === 'starter' || plan === 'pro') {
-    baseItems.push(
-      { id: 'stock-management', label: 'Advanced Stock Control', icon: '📊' },
-      { id: 'barcode-demo', label: 'Barcodes & Tickets', icon: '🏷️' },
-      { id: 'analytics', label: 'Analytics & Insights', icon: '📈' },
-      { id: 'suppliers', label: 'Suppliers', icon: '🤝' },
-      { id: 'purchase-orders', label: 'Purchase Orders', icon: '🧾' },
-      { id: 'purchasing-reports', label: 'Purchasing Reports', icon: '📑' }
-    );
-  }
-
-  // Common items for all tiers
-  baseItems.push(
-    { id: 'scanner', label: 'Scanner', icon: '📱' }
-  );
-
-  // POS Sync restricted to higher tiers
-  if (plan === 'pro') {
-    baseItems.push({ id: 'pos-sync', label: 'POS Sync', icon: '🔄' });
-  }
-
-  baseItems.push(
+    },
+    { id: 'catalog', label: 'Product Catalog', icon: '📦' },
+    { id: 'add-product', label: 'Add Product', icon: '➕' },
+    { id: 'analytics', label: 'Basic Analytics', icon: '📈' },
     { id: 'settings', label: 'Settings', icon: '⚙️' },
     { id: 'help', label: 'Help & Support', icon: '❓' }
-  );
+  ];
 
-  return baseItems;
+  // Starter Features
+  if (plan === 'starter' || plan === 'pro') {
+    navItems = [
+      ...navItems,
+      { id: 'stores', label: 'Store Management', icon: '🏪' },
+      { id: 'scanner', label: 'Scanner', icon: '📱' },
+      { id: 'barcode-demo', label: 'Barcode Support', icon: '🏷️' },
+      { id: 'orders', label: 'Orders Management', icon: '📋' },
+      { id: 'suppliers', label: 'Supplier Management', icon: '🤝' },
+      { id: 'stock-management', label: 'Advanced Stock Control', icon: '📊' },
+    ];
+    // Enhance analytics label for better plans
+    const analyticsItem = navItems.find(i => i.id === 'analytics');
+    if (analyticsItem) analyticsItem.label = 'Detailed Reports';
+  }
+
+  // Pro Exclusive Features
+  if (plan === 'pro') {
+    navItems = [
+      ...navItems,
+      { id: 'pos-sync', label: 'POS Integration', icon: '🔄' },
+      { id: 'clearance', label: 'Clearance Tools', icon: '🏷️' },
+      { id: 'multi-channel-orders', label: 'Multi-Channel Sync', icon: '🌐' },
+    ];
+    // Enhance analytics label for pro plan
+    const analyticsItem = navItems.find(i => i.id === 'analytics');
+    if (analyticsItem) analyticsItem.label = 'Advanced Analytics';
+  }
+  
+  // Adjust label for multi-store context
+  if (storeContext.isMultiStore) {
+    const dashboardItem = navItems.find(i => i.id === 'dashboard');
+    if (dashboardItem) dashboardItem.label = 'Multi-Store Dashboard';
+  }
+
+  return navItems;
 };
 
 /**
