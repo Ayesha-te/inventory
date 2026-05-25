@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import logoImage from '../assets/logo.png';
 import { PLAN_LABELS, normalizePlanName } from '../config/plans';
-import { ADMIN_PANEL_URL } from '../config/urls';
 
 interface AuthProps {
   mode: 'login' | 'signup';
@@ -344,20 +343,10 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
         {/* Switch between login/signup */}
         <div className="text-center mt-8 pt-6 border-t border-gray-100">
           {mode === 'login' && showSignupOption && (
-            <div className="space-y-3">
+            <div>
               <button type="button" className="text-[#B7F000] font-black uppercase text-xs tracking-widest hover:opacity-80 transition-opacity" onClick={showSignupOption}>
                 Need Access? Request Registration
               </button>
-              <div>
-                <a
-                  href={ADMIN_PANEL_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-slate-500 font-black uppercase text-[10px] tracking-[0.2em] hover:text-slate-900 transition-colors"
-                >
-                  Open Admin Panel
-                </a>
-              </div>
             </div>
           )}
           {mode === 'signup' && showLoginOption && (
