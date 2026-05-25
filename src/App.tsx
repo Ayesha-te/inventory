@@ -20,7 +20,6 @@ import POSSync from './components/POSSync';
 import DashboardGraphs from './components/DashboardGraphs';
 import BarcodeTicketManager from './components/BarcodeTicketManager';
 import StockiveDashboard from './components/StockiveDashboard';
-
 import HelpPage from './components/HelpPage';
 import ClearancePage from './components/ClearancePage';
 import MultiChannelOrders from './components/MultiChannelOrders';
@@ -35,6 +34,7 @@ import { getSuppliersWithFallback } from './data/demoData';
 import DebugStoreInfo from './components/DebugStoreInfo';
 import UpgradeModal from './components/UpgradeModal';
 import type { Product, Supermarket, User } from './types/Product';
+import { getAllFeaturesForPlan, getRequiredPlanForFeature, VIEW_TO_FEATURE_MAP, normalizePlanName } from './config/plans';
 
 
 type View = 'dashboard' | 'supermarket-overview' | 'scanner' | 'add-product' | 'stores' | 'catalog' | 'analytics' | 'pos-sync' | 'settings' | 'barcode-demo' | 'suppliers' | 'purchase-orders' | 'purchasing-reports' | 'clearance' | 'multi-channel-orders' | 'channel-management' | 'stock-management' | 'warehouse-management' | 'login' | 'signup';
@@ -50,52 +50,36 @@ function App() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedForBT, setSelectedForBT] = useState<string[]>([]);
-  const [initialPlan, setInitialPlan] = useState<string>('BASIC');
+  const [initialPlan, setInitialPlan] = useState<string>('STARTER');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeModalContent, setUpgradeModalContent] = useState({ featureName: '', requiredPlan: '' });
 
   // --- Plan-Based Feature Control ---
-  const isViewAllowed = (view: View, plan: string): { allowed: boolean; requiredPlan?: string } => {
-    const planToNumber = (p: string) => {
-      if (p === 'pro') return 3;
-      if (p === 'starter') return 2;
-      return 1; // basic
-    };
-
-    const requiredLevels: { [key in View]?: number } = {
-      'stores': 2,
-      'scanner': 2,
-      'barcode-demo': 2,
-      'orders': 2,
-      'suppliers': 2,
-      'stock-management': 2,
-      'pos-sync': 3,
-      'clearance': 3,
-      'multi-channel-orders': 3,
-    };
-
-    const requiredLevel = requiredLevels[view] || 1;
-    const userLevel = planToNumber(plan);
-
-    if (userLevel >= requiredLevel) {
+  const isViewAllowed = (view: View, plan: string): { allowed: boolean } => {
+    const requiredFeature = VIEW_TO_FEATURE_MAP[view];
+    if (!requiredFeature) {
       return { allowed: true };
     }
 
-    let requiredPlan = 'Starter';
-    if (requiredLevel === 3) requiredPlan = 'Pro';
-    
-    return { allowed: false, requiredPlan };
+    const userFeatures = getAllFeaturesForPlan(normalizePlanName(plan));
+    if (userFeatures.has(requiredFeature)) {
+      return { allowed: true };
+    }
+
+    return { allowed: false };
   };
 
   const handleViewChange = (view: View) => {
-    const plan = currentUser?.subscription?.plan || 'basic';
-    const { allowed, requiredPlan } = isViewAllowed(view, plan);
+    const rawPlan = currentUser?.subscription?.plan || 'STARTER';
+    const plan = normalizePlanName(rawPlan);
+    const { allowed } = isViewAllowed(view, plan);
   
     if (allowed) {
       setCurrentView(view);
     } else {
       const featureName = view.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-      setUpgradeModalContent({ featureName, requiredPlan: requiredPlan! });
+      const requiredFeature = VIEW_TO_FEATURE_MAP[view];
+      setUpgradeModalContent({ featureName, requiredPlan: getRequiredPlanForFeature(requiredFeature) });
       setShowUpgradeModal(true);
     }
   };
@@ -107,7 +91,7 @@ function App() {
     const plan = params.get('plan');
 
     if (plan) {
-      setInitialPlan(plan.toUpperCase());
+      setInitialPlan(normalizePlanName(plan));
     }
 
     if (mode === 'signup') {
@@ -136,7 +120,7 @@ function App() {
           registrationDate: response.user.registration_date?.split('T')[0] || new Date().toISOString().split('T')[0],
           isVerified: response.user.is_verified || false,
           subscription: {
-            plan: response.user.subscription_plan?.toLowerCase() || 'basic',
+            plan: normalizePlanName(response.user.subscription_plan || 'STARTER'),
             expiryDate: response.user.subscription_end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
           }
         };
@@ -163,7 +147,7 @@ function App() {
         address: address || '',
         company_name: supermarketName || '',
         supermarket_name: supermarketName || '',
-        subscription_plan: subscriptionPlan || 'BASIC'
+        subscription_plan: normalizePlanName(subscriptionPlan || 'STARTER')
       };
 
       const response = await AuthService.register(registrationData);
@@ -176,7 +160,7 @@ function App() {
           registrationDate: response.user.registration_date?.split('T')[0] || new Date().toISOString().split('T')[0],
           isVerified: response.user.is_verified || false,
           subscription: {
-            plan: response.user.subscription_plan?.toLowerCase() || 'basic',
+            plan: normalizePlanName(response.user.subscription_plan || 'STARTER'),
             expiryDate: response.user.subscription_end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
           }
         };
@@ -456,15 +440,15 @@ function App() {
 
   // Store Management
   const addSupermarket = async (supermarket: Omit<Supermarket, 'id'>) => {
-    const plan = currentUser?.subscription?.plan || 'basic';
+    const plan = normalizePlanName(currentUser?.subscription?.plan || 'STARTER');
     const currentStoreCount = supermarkets.length;
 
-    if (plan === 'basic' && currentStoreCount >= 1) {
-      alert('Your Basic plan allows for only 1 store. Please upgrade to add more stores.');
+    if ((plan === 'STARTER' || plan === 'BASIC') && currentStoreCount >= 1) {
+      alert(`Your ${plan === 'STARTER' ? 'Starter' : 'Basic'} plan allows for only 1 store. Please upgrade to add more stores.`);
       return;
     }
-    if (plan === 'starter' && currentStoreCount >= 3) {
-      alert('Your Starter plan allows for up to 3 stores. Please upgrade to add more stores.');
+    if (plan === 'STANDARD' && currentStoreCount >= 5) {
+      alert('Your Standard plan allows for up to 5 stores. Please upgrade to add more stores.');
       return;
     }
 

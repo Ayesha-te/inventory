@@ -21,9 +21,9 @@ import type {
   WarehouseFormData,
   OrderFilters
 } from '../types/MultiChannelTypes';
+import { API_BASE_URL, API_ROOT_URL } from '../config/urls';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://uneven-martina-sagiyqwgey-54535183.koyeb.app/';
-const ENHANCED_ORDERS_BASE = `${API_BASE_URL}/enhanced-orders`;
+const ENHANCED_ORDERS_BASE = `${API_ROOT_URL}/enhanced-orders`;
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {
@@ -374,13 +374,12 @@ export class MultiChannelService {
 
   // Webhook Management (for displaying webhook URLs to users)
   static getWebhookUrls() {
-    const baseUrl = API_BASE_URL.replace('/api', '');
     return {
-      shopify: `${baseUrl}/api/enhanced-orders/webhooks/shopify/`,
-      amazon: `${baseUrl}/api/enhanced-orders/webhooks/amazon/`,
-      ebay: `${baseUrl}/api/enhanced-orders/webhooks/ebay/`,
-      woocommerce: `${baseUrl}/api/enhanced-orders/webhooks/woocommerce/`,
-      etsy: `${baseUrl}/api/enhanced-orders/webhooks/etsy/`
+      shopify: `${API_BASE_URL}/api/enhanced-orders/webhooks/shopify/`,
+      amazon: `${API_BASE_URL}/api/enhanced-orders/webhooks/amazon/`,
+      ebay: `${API_BASE_URL}/api/enhanced-orders/webhooks/ebay/`,
+      woocommerce: `${API_BASE_URL}/api/enhanced-orders/webhooks/woocommerce/`,
+      etsy: `${API_BASE_URL}/api/enhanced-orders/webhooks/etsy/`
     };
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './hooks/useAuth.tsx';
 import { useProducts, useCategories, useSuppliers, useSupermarkets, useOrders } from './hooks/useApi';
 import { ProductService, CategoryService, SupplierService, SupermarketService } from './services/apiService';
@@ -23,15 +23,56 @@ import HelpPage from './components/HelpPage';
 import logoImage from './assets/logo.png';
 
 import { analyzeStoreContext, getNavigationItems } from './utils/storeUtils';
+import { VIEW_TO_FEATURE_MAP, getAllFeaturesForPlan, getPlanLabel, getRequiredPlanForFeature, normalizePlanName } from './config/plans';
 import type { Product, User, Supermarket } from './types/Product';
 
 // Main App Content Component
 const AppContent: React.FC = () => {
   const { user, isAuthenticated, isLoading, login, logout, register } = useAuth();
   const [currentView, setCurrentView] = useState<'dashboard' | 'scanner' | 'add-product' | 'stores' | 'catalog' | 'analytics' | 'pos-sync' | 'settings' | 'barcode-demo' | 'suppliers' | 'clearance' | 'orders' | 'multi-channel-orders' | 'help' | 'login' | 'signup'>('login');
+  const [initialPlan, setInitialPlan] = useState<string>('STARTER');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [selectedForBT, setSelectedForBT] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [authNotice, setAuthNotice] = useState('');
+  const resolvePlan = () => normalizePlanName((user as any)?.subscription_plan || (user as any)?.subscription?.plan || 'STARTER');
+  const isViewAllowed = (view: typeof currentView) => {
+    const requiredFeature = VIEW_TO_FEATURE_MAP[view];
+    if (!requiredFeature) return true;
+    return getAllFeaturesForPlan(resolvePlan()).has(requiredFeature);
+  };
+  const handleViewChange = (view: typeof currentView) => {
+    if (isViewAllowed(view)) {
+      setCurrentView(view);
+      setEditingProduct(null);
+      return;
+    }
+    const requiredFeature = VIEW_TO_FEATURE_MAP[view];
+    const currentPlanLabel = getPlanLabel(resolvePlan());
+    const requiredPlanLabel = getRequiredPlanForFeature(requiredFeature);
+    alert(`This feature is not available on your ${currentPlanLabel} plan. Upgrade to ${requiredPlanLabel} or higher to continue.`);
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    const plan = params.get('plan');
+
+    if (plan) {
+      setInitialPlan(normalizePlanName(plan));
+    }
+
+    if (mode === 'signup') {
+      setCurrentView('signup');
+    } else if (mode === 'login') {
+      setCurrentView('login');
+    }
+
+    if (mode || plan) {
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, []);
 
   // API data hooks
   const { data: products, loading: productsLoading, refetch: refetchProducts } = useProducts({ search: searchQuery });
@@ -43,8 +84,9 @@ const AppContent: React.FC = () => {
   // Handle authentication
   const handleLogin = async (email: string, password: string, supermarketName?: string) => {
     try {
+      setAuthNotice('');
       await login(email, password);
-      setCurrentView('dashboard');
+      handleViewChange('dashboard');
     } catch (error: any) {
       console.error('Login failed:', error);
       // Surface meaningful error back to Auth component
@@ -52,8 +94,9 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleSignup = async (email: string, password: string, firstName: string, lastName: string, supermarketName?: string, phone?: string, address?: string) => {
+  const handleSignup = async (email: string, password: string, firstName: string, lastName: string, supermarketName?: string, phone?: string, address?: string, subscriptionPlan?: string) => {
     try {
+      setAuthNotice('');
       // Validate required fields
       if (!supermarketName?.trim()) {
         throw new Error('Supermarket name is required');
@@ -68,24 +111,14 @@ const AppContent: React.FC = () => {
         phone: phone || '',
         address: address || '',
         company_name: supermarketName,
-        supermarket_name: supermarketName
+        supermarket_name: supermarketName,
+        subscription_plan: normalizePlanName(subscriptionPlan || 'STARTER')
       };
       
       console.log('Registering user:', userData);
       await register(userData);
-      
-      // After successful registration, login to get token
-      console.log('Logging in after registration...');
-      await login(email, password);
-      
-      // After login, refresh supermarkets (auto-created on backend during registration)
-      try {
-        await refetchSupermarkets();
-      } catch (e) {
-        console.warn('Failed to refresh supermarkets after signup:', e);
-      }
-      
-      setCurrentView('dashboard');
+      setAuthNotice('Registration submitted. Your request is pending admin approval. Please log in after approval.');
+      setCurrentView('login');
     } catch (error: any) {
       console.error('Signup failed:', error);
       // Bubble backend validation like password too short, email taken
@@ -329,7 +362,7 @@ const AppContent: React.FC = () => {
   const navigationItems = getNavigationItems(storeContext, isAuthenticated, user as User);
   
   // Small helper to allow in-app links to switch tabs
-  const navigate = (viewId: typeof currentView) => setCurrentView(viewId);
+  const navigate = (viewId: typeof currentView) => handleViewChange(viewId);
 
   // Determine selected supermarket: saved selection -> first available
   const savedSupermarketId = (typeof window !== 'undefined') ? localStorage.getItem(STORAGE_KEYS.CURRENT_SUPERMARKET_ID) : null;
@@ -358,10 +391,7 @@ const AppContent: React.FC = () => {
         user={user} 
         onLogout={handleLogout} 
         currentView={currentView}
-        onViewChange={(view) => {
-          setCurrentView(view);
-          setEditingProduct(null);
-        }}
+        onViewChange={handleViewChange}
         navigationItems={navigationItems}
         products={products || []}
         supermarkets={supermarkets || []}
@@ -376,7 +406,7 @@ const AppContent: React.FC = () => {
                 <DashboardGraphs 
                   products={products} 
                   supermarkets={supermarkets || []}
-                  onNavigate={(view) => setCurrentView(view as any)}
+                  onNavigate={(view) => handleViewChange(view as any)}
                 />
                 <Dashboard 
                   products={products} 
@@ -384,10 +414,10 @@ const AppContent: React.FC = () => {
                   selectedSupermarketId={selectedSupermarket?.id?.toString() || ''}
                   onEditProduct={(product) => {
                     setEditingProduct(product);
-                    setCurrentView('add-product');
+                    handleViewChange('add-product');
                   }}
                   onDeleteProduct={handleProductDelete}
-                  onNavigate={(view) => setCurrentView(view as any)}
+                  onNavigate={(view) => handleViewChange(view as any)}
                 />
               </>
             )}
@@ -426,7 +456,7 @@ const AppContent: React.FC = () => {
               userStores={supermarkets || []}
               supplierOptions={(suppliers || []).map((s: any) => ({ id: s.id, name: s.name }))}
               onCancel={() => {
-                setCurrentView('dashboard');
+                handleViewChange('dashboard');
                 setEditingProduct(null);
               }}
             />
@@ -460,7 +490,7 @@ const AppContent: React.FC = () => {
                 if (typeof window !== 'undefined') {
                   localStorage.setItem(STORAGE_KEYS.CURRENT_SUPERMARKET_ID, String(storeId));
                 }
-                setCurrentView('dashboard');
+                handleViewChange('dashboard');
               } catch {}
             }}
           />
@@ -621,11 +651,17 @@ const AppContent: React.FC = () => {
         <div className="bg-white rounded-[40px] border border-[#E5E7EB] p-12 shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
           {currentView === 'login' || currentView === 'signup' ? (
             <>
+              {authNotice && (
+                <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+                  {authNotice}
+                </div>
+              )}
               {currentView === 'login' && (
                 <Auth 
                   mode="login" 
                   onAuthSuccess={handleLogin}
                   showSignupOption={() => setCurrentView('signup')}
+                  initialPlan={initialPlan}
                 />
               )}
               {currentView === 'signup' && (
@@ -633,6 +669,7 @@ const AppContent: React.FC = () => {
                   mode="signup" 
                   onAuthSuccess={handleSignup}
                   showLoginOption={() => setCurrentView('login')}
+                  initialPlan={initialPlan}
                 />
               )}
             </>

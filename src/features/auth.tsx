@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import logoImage from '../assets/logo.png';
+import { PLAN_LABELS, normalizePlanName } from '../config/plans';
+import { ADMIN_PANEL_URL } from '../config/urls';
 
 interface AuthProps {
   mode: 'login' | 'signup';
@@ -93,12 +95,16 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [supermarketName, setSupermarketName] = useState('');
-  const [subscriptionPlan, setSubscriptionPlan] = useState(initialPlan || 'BASIC');
+  const [subscriptionPlan, setSubscriptionPlan] = useState(normalizePlanName(initialPlan || 'STARTER'));
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [error, setError] = useState(''); // general/non-field error
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setSubscriptionPlan(normalizePlanName(initialPlan || 'STARTER'));
+  }, [initialPlan]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -291,12 +297,13 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
                   name="subscriptionPlan"
                   required
                   value={subscriptionPlan}
-                  onChange={e => setSubscriptionPlan(e.target.value)}
+                  onChange={e => setSubscriptionPlan(normalizePlanName(e.target.value))}
                   className="form-input"
                 >
+                  <option value="STARTER">{PLAN_LABELS.STARTER}</option>
                   <option value="BASIC">Basic</option>
-                  <option value="STARTER">Starter</option>
-                  <option value="PRO">Pro</option>
+                  <option value="STANDARD">{PLAN_LABELS.STANDARD}</option>
+                  <option value="PREMIUM">{PLAN_LABELS.PREMIUM}</option>
                 </select>
                 <p className="mt-1 text-[10px] theme-text-muted font-bold uppercase tracking-wider">
                   Select a tier to tailor your experience
@@ -337,9 +344,21 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
         {/* Switch between login/signup */}
         <div className="text-center mt-8 pt-6 border-t border-gray-100">
           {mode === 'login' && showSignupOption && (
-            <button type="button" className="text-[#B7F000] font-black uppercase text-xs tracking-widest hover:opacity-80 transition-opacity" onClick={showSignupOption}>
-              Need Access? Request Registration
-            </button>
+            <div className="space-y-3">
+              <button type="button" className="text-[#B7F000] font-black uppercase text-xs tracking-widest hover:opacity-80 transition-opacity" onClick={showSignupOption}>
+                Need Access? Request Registration
+              </button>
+              <div>
+                <a
+                  href={ADMIN_PANEL_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-slate-500 font-black uppercase text-[10px] tracking-[0.2em] hover:text-slate-900 transition-colors"
+                >
+                  Open Admin Panel
+                </a>
+              </div>
+            </div>
           )}
           {mode === 'signup' && showLoginOption && (
             <button type="button" className="text-[#B7F000] font-black uppercase text-xs tracking-widest hover:opacity-80 transition-opacity" onClick={showLoginOption}>

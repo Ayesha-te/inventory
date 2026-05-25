@@ -20,7 +20,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ show, onClose, featureName,
           The <strong>{featureName}</strong> feature is only available on the <strong>{requiredPlan}</strong> plan or higher.
         </p>
         <p className="text-gray-600 mb-6">
-          Please upgrade your subscription to access this feature.
+          Premium includes every available feature in the system.
         </p>
         <div className="flex justify-end gap-4">
           <button

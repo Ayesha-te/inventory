@@ -1,11 +1,13 @@
 /**
  * Comprehensive API service for the Inventory Management System
- * Integrates with backend at https://uneven-martina-sagiyqwgey-54535183.koyeb.app/
+ * Integrates with the configured backend base URL.
  */
+
+import { API_BASE_URL } from './urls';
 
 // Configuration constants
 export const API_CONFIG = {
-  BASE_URL: 'https://uneven-martina-sagiyqwgey-54535183.koyeb.app',
+  BASE_URL: API_BASE_URL,
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,

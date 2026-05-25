@@ -60,7 +60,19 @@ interface UserInterface {
   address?: string;
   phone?: string;
   subscription?: {
-    plan: 'basic' | 'starter' | 'pro';
+    plan:
+      | 'STARTER'
+      | 'BASIC'
+      | 'STANDARD'
+      | 'PREMIUM'
+      | 'OTHER'
+      | 'PRO'
+      | 'starter'
+      | 'basic'
+      | 'standard'
+      | 'premium'
+      | 'other'
+      | 'pro';
     expiryDate?: string;
   };
 }

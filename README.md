@@ -119,14 +119,14 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-The backend API will be available at `https://uneven-martina-sagiyqwgey-54535183.koyeb.app/`
+The backend API will be available at `https://clumsy-virgie-aamzaabdul-f5d0773e.koyeb.app/`
 
 ## 🔧 Configuration
 
 ### Frontend Configuration (`src/config/api.ts`)
 ```typescript
 export const API_CONFIG = {
-  BASE_URL: 'https://uneven-martina-sagiyqwgey-54535183.koyeb.app/',  // Backend URL
+  BASE_URL: 'https://clumsy-virgie-aamzaabdul-f5d0773e.koyeb.app',  // Backend URL
   TIMEOUT: 30000,
   ENDPOINTS: {
     AUTH: '/api/auth',
