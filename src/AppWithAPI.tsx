@@ -90,7 +90,7 @@ const AppContent: React.FC = () => {
     } catch (error: any) {
       console.error('Login failed:', error);
       // Surface meaningful error back to Auth component
-      throw new Error(error?.message || 'Login failed. Please check your credentials.');
+      throw new Error(error?.message || 'We could not sign you in. Please check your email and password.');
     }
   };
 
@@ -99,7 +99,7 @@ const AppContent: React.FC = () => {
       setAuthNotice('');
       // Validate required fields
       if (!supermarketName?.trim()) {
-        throw new Error('Supermarket name is required');
+        throw new Error('Store name is required');
       }
 
       const userData = {
@@ -117,12 +117,12 @@ const AppContent: React.FC = () => {
       
       console.log('Registering user:', userData);
       await register(userData);
-      setAuthNotice('Registration submitted. Your request is pending admin approval. Please log in after approval.');
+      setAuthNotice('Your account request has been sent. An admin needs to approve it before you can sign in.');
       setCurrentView('login');
     } catch (error: any) {
       console.error('Signup failed:', error);
       // Bubble backend validation like password too short, email taken
-      throw new Error(error?.message || 'Registration failed. Please check your details.');
+      throw new Error(error?.message || 'We could not create your account. Please check your details and try again.');
     }
   };
 
@@ -165,7 +165,7 @@ const AppContent: React.FC = () => {
         } else if (error.message.includes('supplier')) {
           errorMessage += 'There was an issue with the supplier.';
         } else if (error.message.includes('supermarket')) {
-          errorMessage += 'No supermarket is available. Please go to Settings to create a supermarket, or try logging out and registering again.';
+          errorMessage += 'We could not find one of your stores. Please go to Settings and add a store, or sign out and sign in again.';
         } else if (error.message.includes('required')) {
           errorMessage += 'Please fill in all required fields.';
         } else {
@@ -498,7 +498,7 @@ const AppContent: React.FC = () => {
 
         {currentView === 'pos-sync' && (
           <div className="bg-white rounded-[32px] border border-[#E5E7EB] p-10 shadow-sm">
-            <h2 className="text-[#020617] text-3xl font-black mb-4 tracking-tight">POS Sync</h2>
+            <h2 className="text-[#020617] text-3xl font-black mb-4 tracking-tight">POS Connection</h2>
             <p className="text-gray-500 font-medium mb-8">
               Connect your inventory with your Point-of-Sale (POS) system.
             </p>
@@ -518,11 +518,7 @@ const AppContent: React.FC = () => {
           />
         )}
 
-        {currentView === 'suppliers' && (
-          <div className="bg-white rounded-[32px] border border-[#E5E7EB] p-10 shadow-sm">
-            <Suppliers />
-          </div>
-        )}
+        {currentView === 'suppliers' && <Suppliers />}
 
         {currentView === 'clearance' && (
           <div className="bg-white rounded-[32px] border border-[#E5E7EB] p-10 shadow-sm">
@@ -535,8 +531,8 @@ const AppContent: React.FC = () => {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-[#020617] text-3xl font-black mb-2 tracking-tight">Orders Management</h2>
-                  <p className="text-gray-500 font-medium">Manage and track all your orders in one place</p>
+                  <h2 className="text-[#020617] text-3xl font-black mb-2 tracking-tight">Orders</h2>
+                  <p className="text-gray-500 font-medium">View and track all your orders in one place</p>
                 </div>
                 <button className="bg-[#B7F000] text-[#020617] font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all">
                   New Order
@@ -553,7 +549,7 @@ const AppContent: React.FC = () => {
                   <p className="text-2xl font-black text-[#020617]">{(orders || []).filter((o: any) => o.status === 'PENDING').length}</p>
                 </div>
                 <div className="bg-[#F9FAFB] p-6 rounded-2xl border border-gray-100">
-                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Processing</h3>
+                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">In Progress</h3>
                   <p className="text-2xl font-black text-[#020617]">{(orders || []).filter((o: any) => o.status === 'PROCESSING').length}</p>
                 </div>
                 <div className="bg-[#F9FAFB] p-6 rounded-2xl border border-gray-100">
@@ -645,7 +641,7 @@ const AppContent: React.FC = () => {
             />
           </div>
           <h1 className="text-4xl font-black text-[#020617] tracking-tight mb-2">STOCKIVE</h1>
-          <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">Cloud Inventory Management</p>
+          <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">Inventory Made Simple</p>
         </div>
 
         <div className="bg-white rounded-[40px] border border-[#E5E7EB] p-12 shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
@@ -675,12 +671,12 @@ const AppContent: React.FC = () => {
             </>
           ) : (
             <div className="text-center py-8">
-              <h2 className="text-2xl font-bold mb-4">Redirecting to login...</h2>
+              <h2 className="text-2xl font-bold mb-4">Taking you to sign in...</h2>
               <button 
                 onClick={() => setCurrentView('login')}
                 className="bg-[#020617] text-white px-8 py-3 rounded-xl font-bold"
               >
-                Go to Login
+                  Go to Sign In
               </button>
             </div>
           )}

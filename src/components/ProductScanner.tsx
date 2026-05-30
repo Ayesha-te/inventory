@@ -68,10 +68,10 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ products }) => {
             <Scan className="w-12 h-12 text-[#B7F000] -rotate-3" />
           </div>
           <div className="flex items-center justify-center gap-3 mb-3">
-            <span className="bg-[#B7F000] text-slate-900 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-[0_4px_15px_rgba(183,240,0,0.3)]">Registry Protocol</span>
+            <span className="bg-[#B7F000] text-slate-900 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-[0_4px_15px_rgba(183,240,0,0.3)]">Quick Scan</span>
           </div>
-          <h2 className="text-5xl font-black text-slate-900 uppercase tracking-tighter mb-4 leading-none">Optical Scanner</h2>
-          <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] max-w-sm mx-auto leading-relaxed">Initialize high-speed asset verification and global inventory synchronization sequence.</p>
+          <h2 className="text-5xl font-black text-slate-900 uppercase tracking-tighter mb-4 leading-none">Product Scanner</h2>
+          <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] max-w-sm mx-auto leading-relaxed">Search for a product by barcode or name.</p>
         </div>
 
         {/* Scanner Input */}
@@ -81,7 +81,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ products }) => {
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 transition-colors group-focus-within:text-[#B7F000]" />
               <input
                 type="text"
-                placeholder="Initialize scan sequence..."
+                placeholder="Enter barcode or product name"
                 value={barcodeInput}
                 onChange={(e) => setBarcodeInput(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -96,12 +96,12 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ products }) => {
               {isScanning ? (
                 <>
                   <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
-                  <span>Syncing</span>
+                  <span>Searching</span>
                 </>
               ) : (
                 <>
                   <Search className="w-5 h-5" />
-                  <span>Execute Scan</span>
+                  <span>Find Product</span>
                 </>
               )}
             </button>
@@ -112,7 +112,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ products }) => {
               onClick={clearScan}
               className="text-slate-400 hover:text-slate-900 text-[10px] font-black uppercase tracking-[0.2em] transition-colors"
             >
-              Reset Protocol Sequence
+               Clear Search
             </button>
           </div>
         </div>
@@ -124,7 +124,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ products }) => {
               <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-slate-100">
                 <Package className="w-10 h-10 text-[#B7F000]" />
               </div>
-              <p className="text-slate-900 font-black uppercase tracking-[0.2em] text-sm">Querying Global Matrix...</p>
+              <p className="text-slate-900 font-black uppercase tracking-[0.2em] text-sm">Looking for your product...</p>
             </div>
           )}
 
@@ -135,9 +135,9 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ products }) => {
                   <XCircle className="w-10 h-10 text-red-500" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-red-900 uppercase tracking-tighter mb-1">Asset Not Located</h3>
+                  <h3 className="text-xl font-black text-red-900 uppercase tracking-tighter mb-1">Product Not Found</h3>
                   <p className="text-red-500 font-bold uppercase text-[10px] tracking-widest">
-                    Identity <span className="text-red-900">"{barcodeInput}"</span> failed verification.
+                    We could not find <span className="text-red-900">"{barcodeInput}"</span>.
                   </p>
                 </div>
               </div>
@@ -152,31 +152,31 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ products }) => {
                     <CheckCircle className="w-6 h-6 text-[#B7F000]" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Asset Identified</h3>
-                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-0.5">Verified Registry Match</p>
+                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Product Found</h3>
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-0.5">Matched in your product list</p>
                   </div>
                 </div>
                 <div className="bg-[#B7F000] text-slate-900 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-[0_4px_15px_rgba(183,240,0,0.3)]">
-                  Matrix Synchronized
+                  Ready
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="space-y-6">
                   <div>
-                    <span className="text-[10px] font-black text-[#7AA100] uppercase tracking-[0.2em]">{scannedProduct.category || 'General Classification'}</span>
+                    <span className="text-[10px] font-black text-[#7AA100] uppercase tracking-[0.2em]">{scannedProduct.category || 'General'}</span>
                     <h4 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mt-1 leading-none">{scannedProduct.name}</h4>
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">{scannedProduct.brand || 'Proprietary Brand'}</p>
+                      <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">{scannedProduct.brand || 'No brand listed'}</p>
                   </div>
 
                   <div className="space-y-4 pt-6 border-t border-slate-200">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Supply Node</span>
-                      <span className="text-sm font-black text-slate-900 uppercase">{scannedProduct.supplier || 'UNSPECIFIED'}</span>
+                        <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Supplier</span>
+                        <span className="text-sm font-black text-slate-900 uppercase">{scannedProduct.supplier || 'Not listed'}</span>
                     </div>
 
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Fiscal Value</span>
+                        <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Price</span>
                       <span className="text-3xl font-black text-slate-900 tracking-tighter">${scannedProduct.price}</span>
                     </div>
                   </div>
@@ -185,7 +185,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ products }) => {
                 <div className="space-y-6">
                   <div className="bg-[#020617] p-6 rounded-[24px] border border-gray-800 relative overflow-hidden group hover:border-[#B7F000]/50 transition-colors">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-[#B7F000]/5 rounded-full -mr-10 -mt-10"></div>
-                    <h5 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Inventory Density</h5>
+                    <h5 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Stock Level</h5>
                     <div className="flex justify-between items-end">
                       <div>
                         <span className={`text-5xl font-black tracking-tighter ${
@@ -210,16 +210,16 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ products }) => {
                     getExpiryStatus(scannedProduct.expiryDate).status === 'expiring' ? 'bg-orange-500/5 border-orange-500/20' :
                     'bg-red-500/5 border-red-500/20'
                   }`}>
-                    <h5 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Obsolescence Tracking</h5>
+                    <h5 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Expiry Check</h5>
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Expiry Vector</span>
+                          <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Expiry Date</span>
                         <span className="text-sm font-black text-white">
                           {new Date(scannedProduct.expiryDate).toLocaleDateString()}
                         </span>
                       </div>
                       <div className="flex justify-between items-center pt-3 border-t border-gray-800">
-                        <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Protocol Status</span>
+                          <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Status</span>
                         <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${
                           getExpiryStatus(scannedProduct.expiryDate).status === 'fresh' ? 'text-[#B7F000] border-[#B7F000]/20 bg-[#B7F000]/10' :
                           getExpiryStatus(scannedProduct.expiryDate).status === 'expiring' ? 'text-orange-500 border-orange-500/20 bg-orange-500/10' :
@@ -235,10 +235,10 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ products }) => {
               
               <div className="mt-10 pt-8 border-t border-gray-800 flex gap-4">
                 <button className="flex-1 bg-[#B7F000] text-[#020617] py-5 rounded-2xl font-black uppercase tracking-widest text-xs transition-all hover:bg-[#a2d600] hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(183,240,0,0.2)]">
-                  Update Registry
+                  Edit Product
                 </button>
                 <button className="flex-1 bg-transparent text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs border-2 border-gray-800 transition-all hover:border-white hover:scale-[1.02] active:scale-[0.98]">
-                  Print Asset Ticket
+                  Print Label
                 </button>
               </div>
             </div>

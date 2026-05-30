@@ -1,7 +1,6 @@
 import type { Supermarket, User } from '../types/Product';
 import { getAllFeaturesForPlan, normalizePlanName } from '../config/plans';
 
-
 export interface StoreContext {
   isMultiStore: boolean;
   userStores: Supermarket[];
@@ -14,7 +13,7 @@ export interface StoreContext {
  * Analyze user's store context to determine single vs multi-store setup
  */
 export const analyzeStoreContext = (
-  stores: Supermarket[], 
+  stores: Supermarket[],
   currentUser: User | null
 ): StoreContext => {
   if (!currentUser) {
@@ -23,19 +22,19 @@ export const analyzeStoreContext = (
       userStores: [],
       mainStore: null,
       subStores: [],
-      totalStores: 0
+      totalStores: 0,
     };
   }
 
   // Backend already filters stores by authenticated user, so we can use all stores
   const userStores = stores;
-  
+
   // Find main store (not a sub-store)
-  const mainStore = userStores.find(store => !store.isSubStore) || null;
-  
-  // Find sub-stores
-  const subStores = userStores.filter(store => store.isSubStore);
-  
+  const mainStore = userStores.find((store) => !store.isSubStore) || null;
+
+  // Find branch stores
+  const subStores = userStores.filter((store) => store.isSubStore);
+
   const totalStores = userStores.length;
   const isMultiStore = totalStores > 1;
 
@@ -44,7 +43,7 @@ export const analyzeStoreContext = (
     userStores,
     mainStore,
     subStores,
-    totalStores
+    totalStores,
   };
 };
 
@@ -52,18 +51,22 @@ export const analyzeStoreContext = (
  * Get store display name with context
  */
 export const getStoreDisplayName = (store: Supermarket): string => {
-  const suffix = store.isSubStore ? ' (Sub-Store)' : ' (Main Store)';
+  const suffix = store.isSubStore ? ' (Branch)' : ' (Main Store)';
   return `${store.name}${suffix}`;
 };
 
 /**
  * Get navigation items based on store context and user plan
  */
-export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: boolean, currentUser: User | null) => {
+export const getNavigationItems = (
+  storeContext: StoreContext,
+  isAuthenticated: boolean,
+  currentUser: User | null
+) => {
   if (!isAuthenticated) {
     return [
-      { id: 'login', label: 'Login', icon: '🔑' },
-      { id: 'signup', label: 'Sign Up', icon: '📝' }
+      { id: 'login', label: 'Sign In', icon: '🔑' },
+      { id: 'signup', label: 'Sign Up', icon: '📝' },
     ];
   }
 
@@ -75,114 +78,114 @@ export const getNavigationItems = (storeContext: StoreContext, isAuthenticated: 
   const userFeatures = getAllFeaturesForPlan(plan);
 
   const allNavItems = [
-    { 
-      id: 'dashboard', 
-      label: 'Dashboard', 
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
       icon: '📊',
-      feature: 'core_inventory' // All plans have this
+      feature: 'core_inventory',
     },
-    { 
-      id: 'catalog', 
-      label: 'Product Catalog', 
+    {
+      id: 'catalog',
+      label: 'Products',
       icon: '📦',
-      feature: 'core_inventory' 
+      feature: 'core_inventory',
     },
-    { 
-      id: 'add-product', 
-      label: 'Add Product', 
+    {
+      id: 'add-product',
+      label: 'Add Product',
       icon: '➕',
-      feature: 'core_inventory'
+      feature: 'core_inventory',
     },
-    { 
-      id: 'analytics', 
-      label: 'Analytics', 
+    {
+      id: 'analytics',
+      label: 'Analytics',
       icon: '📈',
-      feature: 'basic_analytics'
+      feature: 'basic_analytics',
     },
-    { 
-      id: 'settings', 
-      label: 'Settings', 
+    {
+      id: 'settings',
+      label: 'Settings',
       icon: '⚙️',
-      feature: 'core_inventory'
+      feature: 'core_inventory',
     },
-    { 
-      id: 'help', 
-      label: 'Help & Support', 
+    {
+      id: 'help',
+      label: 'Help',
       icon: '❓',
-      feature: 'core_inventory'
+      feature: 'core_inventory',
     },
-    { 
-      id: 'stores', 
-      label: 'Store Management', 
+    {
+      id: 'stores',
+      label: 'Stores',
       icon: '🏪',
-      feature: 'core_inventory' 
+      feature: 'core_inventory',
     },
-    { 
-      id: 'scanner', 
-      label: 'Scanner', 
+    {
+      id: 'scanner',
+      label: 'Scanner',
       icon: '📱',
-      feature: 'barcode_scanner_support'
+      feature: 'barcode_scanner_support',
     },
-    { 
-      id: 'barcode-demo', 
-      label: 'Barcode Support', 
+    {
+      id: 'barcode-demo',
+      label: 'Barcodes',
       icon: '🏷️',
-      feature: 'barcode_scanner_support'
+      feature: 'barcode_scanner_support',
     },
-    { 
-      id: 'orders', 
-      label: 'Orders Management', 
+    {
+      id: 'orders',
+      label: 'Orders',
       icon: '📋',
-      feature: 'orders_management'
+      feature: 'orders_management',
     },
-    { 
-      id: 'suppliers', 
-      label: 'Supplier Management', 
+    {
+      id: 'suppliers',
+      label: 'Suppliers',
       icon: '🤝',
-      feature: 'supplier_management'
+      feature: 'supplier_management',
     },
-    { 
-      id: 'stock-management', 
-      label: 'Advanced Stock Control', 
+    {
+      id: 'stock-management',
+      label: 'Stock Control',
       icon: '📊',
-      feature: 'advanced_inventory'
+      feature: 'advanced_inventory',
     },
-    { 
-      id: 'pos-sync', 
-      label: 'POS Integration', 
+    {
+      id: 'pos-sync',
+      label: 'POS Connection',
       icon: '🔄',
-      feature: 'pos_integration'
+      feature: 'pos_integration',
     },
-    { 
-      id: 'clearance', 
-      label: 'Clearance Tools', 
+    {
+      id: 'clearance',
+      label: 'Clearance',
       icon: '🏷️',
-      feature: 'advanced_analytics'
+      feature: 'advanced_analytics',
     },
-    { 
-      id: 'multi-channel-orders', 
-      label: 'Multi-Channel Sync', 
+    {
+      id: 'multi-channel-orders',
+      label: 'Sales Channels',
       icon: '🌐',
-      feature: 'multi_channel_sync'
+      feature: 'multi_channel_sync',
     },
   ];
 
-  let navItems = allNavItems.filter(item => userFeatures.has(item.feature));
+  const navItems = allNavItems.filter((item) => userFeatures.has(item.feature));
 
   // Adjust labels based on plan
-  const analyticsItem = navItems.find(i => i.id === 'analytics');
+  const analyticsItem = navItems.find((item) => item.id === 'analytics');
   if (analyticsItem) {
-    if (userFeatures.has('advanced_analytics')) {
-      analyticsItem.label = 'Advanced Analytics';
-    } else {
-      analyticsItem.label = 'Basic Analytics';
-    }
+    analyticsItem.label = userFeatures.has('advanced_analytics')
+      ? 'Advanced Analytics'
+      : 'Basic Analytics';
   }
 
   // Adjust label for multi-store context
   if (storeContext.isMultiStore) {
-    const dashboardItem = navItems.find(i => i.id === 'dashboard');
-    if (dashboardItem) dashboardItem.label = 'Multi-Store Dashboard';
+    const dashboardItem = navItems.find((item) => item.id === 'dashboard');
+    if (dashboardItem) {
+      dashboardItem.label = 'Store Dashboard';
+    }
   }
 
   return navItems;

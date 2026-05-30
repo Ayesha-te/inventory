@@ -95,28 +95,28 @@ const ProductList: React.FC<ProductListProps> = ({
   // Download individual barcode
   const downloadBarcode = async (product: Product) => {
     if (product.id.startsWith('product-')) {
-      alert('Please save this product to the server before downloading a barcode.');
+      alert('Please save this product before downloading a barcode.');
       return;
     }
     try {
       await barcodeService.downloadBarcodeImage(product.id, product.name);
     } catch (error) {
       console.error('Error downloading barcode:', error);
-      alert('Failed to download barcode. Please try again.');
+      alert('Could not download the barcode. Please try again.');
     }
   };
 
   // Download individual ticket
   const downloadTicket = async (product: Product) => {
     if (product.id.startsWith('product-')) {
-      alert('Please save this product to the server before downloading a ticket.');
+      alert('Please save this product before downloading a label.');
       return;
     }
     try {
       await barcodeService.downloadTicketPDF(product.id, product.name);
     } catch (error) {
       console.error('Error downloading ticket:', error);
-      alert('Failed to download ticket. Please try again.');
+      alert('Could not download the label. Please try again.');
     }
   };
 
@@ -128,7 +128,7 @@ const ProductList: React.FC<ProductListProps> = ({
             onClick={() => setShowBarcodeManager(false)}
             className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
           >
-            ← Back to Product List
+            Back to Products
           </button>
         </div>
         <BarcodeTicketManager
@@ -145,8 +145,8 @@ const ProductList: React.FC<ProductListProps> = ({
       {/* Header with Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
         <div>
-          <h2 className="text-3xl font-black text-[#020617] tracking-tight uppercase">Asset Registry</h2>
-          <p className="text-gray-500 font-medium text-sm mt-1">Operational view of active inventory nodes.</p>
+          <h2 className="text-3xl font-black text-[#020617] tracking-tight uppercase">Products</h2>
+          <p className="text-gray-500 font-medium text-sm mt-1">View and manage your products in one place.</p>
         </div>
         <div className="flex items-center gap-4">
           {showBarcode && (
@@ -167,7 +167,7 @@ const ProductList: React.FC<ProductListProps> = ({
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 transition-colors group-focus-within:text-[#B7F000]" />
           <input
             type="text"
-            placeholder="Search assets by identity or supplier..."
+            placeholder="Search products by name or supplier..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-14 pr-6 py-5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-[24px] focus:outline-none focus:ring-2 focus:ring-[#B7F000]/50 text-sm transition-all focus:bg-white font-medium"
@@ -182,7 +182,7 @@ const ProductList: React.FC<ProductListProps> = ({
           >
             {categories.map((category) => (
               <option key={category} value={category}>
-                {category === "all" ? "All Classifications" : category}
+                {category === "all" ? "All Categories" : category}
               </option>
             ))}
           </select>
@@ -195,9 +195,9 @@ const ProductList: React.FC<ProductListProps> = ({
           <div className="bg-white w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-sm">
             <Package className="w-10 h-10 text-gray-300" />
           </div>
-          <h3 className="text-2xl font-black text-[#020617] tracking-tight uppercase mb-4">No Assets Located</h3>
+          <h3 className="text-2xl font-black text-[#020617] tracking-tight uppercase mb-4">No Products Found</h3>
           <p className="text-gray-500 font-medium max-w-sm mx-auto leading-relaxed mb-8">
-            The current registry query returned zero matches. Verify your filters or add a new product.
+            No products match your search or filters. Try changing them or add a new product.
           </p>
           {searchTerm === "" && filterCategory === "all" && (
             <button 
@@ -214,13 +214,13 @@ const ProductList: React.FC<ProductListProps> = ({
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-[#020617] text-white">
-                  <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] first:rounded-tl-[40px]">Identity</th>
-                  <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Classification</th>
-                  <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Registry Node</th>
-                  <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Mass / Density</th>
-                  <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Valuation</th>
-                  <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Protocol Status</th>
-                  <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em] last:rounded-tr-[40px]">Operations</th>
+                  <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] first:rounded-tl-[40px]">Product</th>
+                  <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Category</th>
+                  <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Store</th>
+                  <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Stock / Size</th>
+                  <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Price</th>
+                  <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Expiry Status</th>
+                  <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em] last:rounded-tr-[40px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -246,13 +246,13 @@ const ProductList: React.FC<ProductListProps> = ({
                           <MapPin className="w-3 h-3 text-[#B7F000]" />
                           <span className="text-[11px] font-bold text-[#020617]">{supermarketInfo.name}</span>
                           {supermarketInfo.isSubStore && (
-                            <span className="px-1.5 py-0.5 bg-[#020617] text-[#B7F000] text-[8px] font-black uppercase rounded">Sub</span>
+                            <span className="px-1.5 py-0.5 bg-[#020617] text-[#B7F000] text-[8px] font-black uppercase rounded">Branch</span>
                           )}
                         </div>
                       </td>
                       <td className="px-6 py-6">
                         <div className="flex flex-col">
-                          <span className="text-sm font-black text-[#020617]">{product.quantity} <span className="text-[10px] text-gray-400">PCS</span></span>
+                          <span className="text-sm font-black text-[#020617]">{product.quantity} <span className="text-[10px] text-gray-400">items</span></span>
                           <span className="text-[10px] font-bold text-gray-400 mt-0.5">{product.weight || 'N/A'}</span>
                         </div>
                       </td>
@@ -277,7 +277,7 @@ const ProductList: React.FC<ProductListProps> = ({
                             <ActionButton
                               color="green"
                               icon={<Download className="w-3 h-3" />}
-                              label="BARCODE"
+                              label="Barcode"
                               onClick={() => downloadBarcode(product)}
                               size="sm"
                             />
@@ -292,9 +292,9 @@ const ProductList: React.FC<ProductListProps> = ({
                           <ActionButton
                             color="red"
                             icon={<Trash2 className="w-3 h-3" />}
-                            label="DELETE"
+                            label="Delete"
                             onClick={() => {
-                              if (window.confirm("Delete this asset from registry permanently?")) {
+                              if (window.confirm("Delete this product permanently?")) {
                                 onDelete(product.id);
                               }
                             }}

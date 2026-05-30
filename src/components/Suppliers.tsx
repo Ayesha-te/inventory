@@ -1,29 +1,26 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { 
-  Users, 
-  Settings as SettingsIcon, 
-  Package, 
-  Truck, 
-  Calendar, 
-  DollarSign, 
-  FileText, 
-  Download, 
-  Upload, 
-  Plus, 
-  Trash2, 
-  Edit3, 
-  ExternalLink,
-  Search,
-  CheckCircle,
+import React, { useEffect, useRef, useState } from 'react';
+import {
   AlertCircle,
-  ChevronRight,
+  CheckCircle,
+  Clock,
+  Download,
+  Edit3,
+  FileText,
+  Mail,
   MapPin,
   Phone,
-  Mail,
-  Clock,
-  RefreshCw
+  Plus,
+  RefreshCw,
+  Trash2,
+  Upload,
+  Users,
 } from 'lucide-react';
-import { SupplierService, ProductService, SupplierProductService, PurchaseOrderService, MappingService, SupermarketService } from '../services/apiService';
+import {
+  MappingService,
+  PurchaseOrderService,
+  SupplierService,
+  SupermarketService,
+} from '../services/apiService';
 
 interface Supplier {
   id: number;
@@ -31,85 +28,86 @@ interface Supplier {
   email?: string;
   phone?: string;
   address?: string;
+  credit_days?: number;
 }
-
-interface ProductOption { id: string; name: string; category?: string }
 
 export default function Suppliers() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [products, setProducts] = useState<ProductOption[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [poSummary, setPoSummary] = useState<any[]>([]);
   const [supermarkets, setSupermarkets] = useState<{ id: string; name: string }[]>([]);
-  // Reference to scroll to the PO section when starting a PO from supplier row
-  const poSectionRef = React.useRef<HTMLDivElement>(null);
+  const poSectionRef = useRef<HTMLDivElement>(null);
 
-  // Create/Edit supplier form
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [form, setForm] = useState<{ name: string; email: string; phone: string; address: string; credit_days: string }>({
-    name: '', email: '', phone: '', address: '', credit_days: '0'
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    credit_days: '0',
   });
 
-  // Supplier-Product mapping form
-  const [mapForm, setMapForm] = useState<{ supplierId: string; productId: string; supplierPrice: string; availableQty: string }>({
-    supplierId: '', productId: '', supplierPrice: '', availableQty: ''
+  const [poForm, setPoForm] = useState({
+    supplierId: '',
+    supermarketName: '',
+    expectedDate: '',
+    paymentTerms: 'Net 30',
+    buyerName: '',
+    notes: '',
   });
-
-  // Best supplier check form (multi-select products)
-  const [bestForm, setBestForm] = useState<{ qty: string }>({ qty: '1' });
-  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
-  const [isProductDropdownOpen, setIsProductDropdownOpen] = useState<boolean>(false);
-  const [bestResults, setBestResults] = useState<Record<string, any>>({});
-
-  // For product -> suppliers view
-  const [productSupplierQuery, setProductSupplierQuery] = useState<string>('');
-  const [productSuppliers, setProductSuppliers] = useState<any[]>([]);
-
-  // PO form (manual) + Excel import
-  const [poForm, setPoForm] = useState<{ supplierId: string; supermarketName: string; expectedDate: string; paymentTerms: string; buyerName: string; notes: string }>(
-    { supplierId: '', supermarketName: '', expectedDate: '', paymentTerms: 'Net 30', buyerName: '', notes: '' }
-  );
   const [poItems, setPoItems] = useState<Array<{ productName: string; quantity: string; unitPrice: string }>>([
-    { productName: '', quantity: '1', unitPrice: '0' }
+    { productName: '', quantity: '1', unitPrice: '0' },
   ]);
-
-  const supplierOptions = useMemo(() => suppliers.map(s => ({ value: String(s.id), label: s.name })), [suppliers]);
-  const productOptions = useMemo(() => products.map(p => ({ value: String(p.id), label: p.name })), [products]);
 
   useEffect(() => {
     const load = async () => {
-      setLoading(true); setError('');
+      setLoading(true);
+      setError('');
+
       try {
-        const [supplierRes, productRes, poRes, smRes] = await Promise.all([
+        const [supplierRes, poRes, supermarketRes] = await Promise.all([
           SupplierService.getSuppliers(),
-          ProductService.getProducts(),
-          PurchaseOrderService.list().catch(() => ([])),
-          SupermarketService.getSupermarkets().catch(() => ([])),
+          PurchaseOrderService.list().catch(() => []),
+          SupermarketService.getSupermarkets().catch(() => []),
         ]);
+
         const supplierList: Supplier[] = Array.isArray(supplierRes) ? supplierRes : supplierRes.results || [];
-        const productList = (Array.isArray(productRes) ? productRes : productRes.results || []).map((p: any) => ({ id: String(p.id ?? p.uuid ?? ''), name: String(p.name ?? ''), category: String(p.category_name ?? p.category ?? 'General') }));
         const poList = Array.isArray(poRes) ? poRes : poRes.results || [];
-        const smList = (Array.isArray(smRes) ? smRes : smRes.results || []).map((s: any) => ({ id: String(s.id ?? s.uuid ?? ''), name: String(s.name ?? '') }));
-        console.log('Fetched PO list:', poList);
+        const supermarketList = (Array.isArray(supermarketRes) ? supermarketRes : supermarketRes.results || []).map(
+          (store: any) => ({
+            id: String(store.id ?? store.uuid ?? ''),
+            name: String(store.name ?? ''),
+          })
+        );
+
         setSuppliers(supplierList);
-        setProducts(productList);
         setPoSummary(poList);
-        setSupermarkets(smList);
-      } catch (e: any) {
-        setError(e?.message || 'Failed to load suppliers/products/stores');
+        setSupermarkets(supermarketList);
+      } catch (loadError: any) {
+        setError(loadError?.message || 'Failed to load suppliers, stores, or orders.');
       } finally {
         setLoading(false);
       }
     };
+
     load();
   }, []);
 
-  const resetForm = () => { setEditingId(null); setForm({ name: '', email: '', phone: '', address: '', credit_days: '0' }); };
+  const resetForm = () => {
+    setEditingId(null);
+    setForm({ name: '', email: '', phone: '', address: '', credit_days: '0' });
+  };
 
   const submitSupplier = async () => {
-    if (!form.name.trim()) { setError('Supplier name is required'); return; }
-    setLoading(true); setError('');
+    if (!form.name.trim()) {
+      setError('Supplier name is required.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
     try {
       const payload = {
         name: form.name,
@@ -118,705 +116,833 @@ export default function Suppliers() {
         address: form.address || undefined,
         credit_days: Number(form.credit_days || '0'),
       };
+
       if (editingId) {
         const updated = await SupplierService.updateSupplier(editingId, payload);
-        setSuppliers(prev => prev.map(s => s.id === editingId ? { ...s, ...updated } : s));
+        setSuppliers((previous) => previous.map((supplier) => (supplier.id === editingId ? { ...supplier, ...updated } : supplier)));
       } else {
         const created = await SupplierService.createSupplier(payload);
-        setSuppliers(prev => [...prev, created]);
+        setSuppliers((previous) => [...previous, created]);
       }
+
       resetForm();
-    } catch (e: any) {
-      setError(e?.message || 'Failed to save supplier');
-    } finally { setLoading(false); }
+    } catch (submitError: any) {
+      setError(submitError?.message || 'Failed to save supplier.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const startEdit = (s: Supplier) => {
-    setEditingId(s.id);
-    setForm({ name: s.name || '', email: s.email || '', phone: s.phone || '', address: s.address || '', credit_days: String((s as any).credit_days ?? '0') });
+  const startEdit = (supplier: Supplier) => {
+    setEditingId(supplier.id);
+    setForm({
+      name: supplier.name || '',
+      email: supplier.email || '',
+      phone: supplier.phone || '',
+      address: supplier.address || '',
+      credit_days: String(supplier.credit_days ?? '0'),
+    });
   };
 
   const removeSupplier = async (id: number) => {
     if (!confirm('Delete this supplier?')) return;
-    setLoading(true); setError('');
+
+    setLoading(true);
+    setError('');
+
     try {
       await SupplierService.deleteSupplier(id);
-      setSuppliers(prev => prev.filter(s => s.id !== id));
+      setSuppliers((previous) => previous.filter((supplier) => supplier.id !== id));
       if (editingId === id) resetForm();
-    } catch (e: any) {
-      setError(e?.message || 'Failed to delete supplier');
-    } finally { setLoading(false); }
-  };
-
-  const mapSupplierProduct = async () => {
-    if (!mapForm.supplierId || !mapForm.productId || !mapForm.supplierPrice) {
-      setError('Supplier, Product and Price are required');
-      return;
+    } catch (removeError: any) {
+      setError(removeError?.message || 'Failed to delete supplier.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(true); setError('');
-    try {
-      await SupplierProductService.create({
-        supplier: Number(mapForm.supplierId),
-        product: mapForm.productId,
-        supplier_price: Number(mapForm.supplierPrice),
-        available_quantity: mapForm.availableQty ? Number(mapForm.availableQty) : undefined,
-      });
-      setMapForm({ supplierId: '', productId: '', supplierPrice: '', availableQty: '' });
-      alert('Supplier mapped to product successfully');
-    } catch (e: any) {
-      setError(e?.message || 'Failed to map supplier to product');
-    } finally { setLoading(false); }
-  };
-
-  const findBestSupplier = async () => {
-    if (!selectedProductIds.length || !bestForm.qty) { setError('Select at least one product and a quantity'); return; }
-    setLoading(true); setError(''); setBestResults({});
-    try {
-      const qty = Number(bestForm.qty);
-      const entries: Record<string, any> = {};
-      for (const pid of selectedProductIds) {
-        try {
-          const res = await SupplierProductService.bestSupplier(pid, qty);
-          entries[pid] = res;
-        } catch (err) {
-          entries[pid] = { error: (err as any)?.message || 'Failed' };
-        }
-      }
-      setBestResults(entries);
-    } catch (e: any) {
-      setError(e?.message || 'Failed to get best supplier');
-    } finally { setLoading(false); }
   };
 
   const submitPO = async () => {
-    if (!poForm.supplierId) { setError('Select supplier for PO'); return; }
-    const validItems = poItems.filter(it => it.productName.trim() && Number(it.quantity) > 0);
-    if (!validItems.length) { setError('Add at least one line item'); return; }
-    setLoading(true); setError('');
+    if (!poForm.supplierId) {
+      setError('Select a supplier before creating the order.');
+      return;
+    }
+
+    const validItems = poItems.filter(
+      (item) => item.productName.trim() && Number(item.quantity) > 0
+    );
+
+    if (!validItems.length) {
+      setError('Add at least one order item.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
     try {
-      const supermarketName = (poForm.supermarketName || '').trim();
+      const supermarketName = poForm.supermarketName.trim();
       if (!supermarketName) {
-        setError('Enter an existing supermarket name');
+        setError('Enter an existing store name.');
         setLoading(false);
         return;
       }
-      // Resolve supermarket name to ID (auto-create if missing)
+
       const supermarketId = await MappingService.getSupermarketId(supermarketName);
 
       const payload: any = {
         supplier: Number(poForm.supplierId),
-        supermarket: supermarketId, // always send ID
-        // Omit po_number so backend auto-generates it
+        supermarket: supermarketId,
         expected_delivery_date: poForm.expectedDate || undefined,
         payment_terms: poForm.paymentTerms || undefined,
         buyer_name: poForm.buyerName || undefined,
         notes: poForm.notes || undefined,
-        items: validItems.map(it => ({ product_text: it.productName, quantity: Number(it.quantity), unit_price: Number(it.unitPrice || '0') })),
+        items: validItems.map((item) => ({
+          product_text: item.productName,
+          quantity: Number(item.quantity),
+          unit_price: Number(item.unitPrice || '0'),
+        })),
       };
-      console.log('PO creation payload:', payload);
+
       await PurchaseOrderService.create(payload);
-      setPoForm({ supplierId: '', supermarketName: '', expectedDate: '', paymentTerms: 'Net 30', buyerName: '', notes: '' });
+      setPoForm({
+        supplierId: '',
+        supermarketName: '',
+        expectedDate: '',
+        paymentTerms: 'Net 30',
+        buyerName: '',
+        notes: '',
+      });
       setPoItems([{ productName: '', quantity: '1', unitPrice: '0' }]);
-      const res = await PurchaseOrderService.list();
-      console.log('PO list after creation:', res);
-      setPoSummary(Array.isArray(res) ? res : res.results || []);
-      alert('PO created');
-    } catch (e: any) {
-      setError(e?.message || 'Failed to create PO');
-    } finally { setLoading(false); }
+
+      const refreshedOrders = await PurchaseOrderService.list();
+      setPoSummary(Array.isArray(refreshedOrders) ? refreshedOrders : refreshedOrders.results || []);
+      alert('Order created successfully.');
+    } catch (submitError: any) {
+      setError(submitError?.message || 'Failed to create order.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const downloadSupplierCsv = () => {
+    const rows = [
+      ['Name', 'Email', 'Phone', 'Address', 'Payment Days', 'Orders'],
+      ...suppliers.map((supplier) => {
+        const poCount = poSummary.filter(
+          (order: any) => order.supplier === supplier.id || order.supplier_name === supplier.name
+        ).length;
+
+        return [
+          supplier.name,
+          supplier.email || '',
+          supplier.phone || '',
+          supplier.address || '',
+          String(supplier.credit_days ?? ''),
+          String(poCount),
+        ];
+      }),
+    ];
+
+    downloadCsv(rows, 'suppliers_list.csv');
   };
 
   const downloadPOExcelTemplate = () => {
-    const tip = 'expected_delivery_date must be YYYY-MM-DD';
     const rows = [
-      ['po_number','supplier_name','supermarket_name','buyer_name','expected_delivery_date','payment_terms','notes','product_name','category_name','quantity','unit_price','_note'],
-      ['PO-2025-01','Tech Supplier Ltd','Main Store','Your Business','2025-09-10','Net 30','Optional note','Dell Laptop','Electronics','10','800', tip]
+      [
+        'po_number',
+        'supplier_name',
+        'supermarket_name',
+        'buyer_name',
+        'expected_delivery_date',
+        'payment_terms',
+        'notes',
+        'product_name',
+        'category_name',
+        'quantity',
+        'unit_price',
+      ],
+      [
+        'PO-2025-01',
+        'Tech Supplier Ltd',
+        'Main Store',
+        'Your Name',
+        '2025-09-10',
+        'Net 30',
+        'Optional note',
+        'Dell Laptop',
+        'Electronics',
+        '10',
+        '800',
+      ],
     ];
-    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'po_template.csv'; a.click(); URL.revokeObjectURL(url);
+
+    downloadCsv(rows, 'po_template.csv');
   };
 
   const handlePOCsvUpload = async (file: File) => {
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
+
     try {
       const text = await file.text();
       const [header, ...lines] = text.split(/\r?\n/).filter(Boolean);
-      const cols = header.split(',').map(s => s.replace(/^\"|\"$/g,'').trim());
-      const idx = (name: string) => cols.findIndex(c => c.replace(/\"/g,'').toLowerCase() === name);
-      const poGroups: Record<string, any> = {};
+      const columns = header.split(',').map((value) => value.replace(/^"|"$/g, '').trim());
+      const getIndex = (name: string) =>
+        columns.findIndex((column) => column.replace(/"/g, '').toLowerCase() === name);
 
-      // Build a quick lookup for supermarkets by name (case-insensitive)
-      const smByName = new Map<string, string>();
-      supermarkets.forEach(s => smByName.set(s.name.trim().toLowerCase(), s.id));
+      const orderGroups: Record<string, any> = {};
+      const storeByName = new Map<string, string>();
+      supermarkets.forEach((store) => storeByName.set(store.name.trim().toLowerCase(), store.id));
 
-      // Helper: normalize date -> YYYY-MM-DD if possible
-      const normalizeDate = (val: string) => {
-        const v = (val || '').trim();
-        if (!v) return '';
-        // Allow already-correct format
-        if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
-        // Try to parse flexible formats like 10/09/2025, 10-09-2025, 10 Sep 2025 etc.
-        const d = new Date(v);
-        if (!isNaN(d.getTime())) {
-          const yyyy = d.getFullYear();
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const dd = String(d.getDate()).padStart(2, '0');
-          return `${yyyy}-${mm}-${dd}`;
+      const normalizeDate = (value: string) => {
+        const trimmed = (value || '').trim();
+        if (!trimmed) return '';
+        if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+        const parsed = new Date(trimmed);
+        if (!Number.isNaN(parsed.getTime())) {
+          const year = parsed.getFullYear();
+          const month = String(parsed.getMonth() + 1).padStart(2, '0');
+          const day = String(parsed.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
         }
-        return v; // fallback, backend will validate
+        return trimmed;
       };
 
       for (const line of lines) {
-        const cells = line.match(/\"([^\"]|\"\")*\"|[^,]+/g) || [];
-        const val = (i: number) => (cells[i] || '').replace(/^\"|\"$/g,'');
-        const poNumber = val(idx('po_number'));
-        const supplierName = val(idx('supplier_name'));
-        const supermarketName = val(idx('supermarket_name'));
-        const buyerName = val(idx('buyer_name'));
-        const expectedDate = normalizeDate(val(idx('expected_delivery_date')));
-        const paymentTerms = val(idx('payment_terms'));
-        const notes = val(idx('notes'));
-        const productName = val(idx('product_name'));
-        const categoryName = val(idx('category_name'));
-        const quantity = Number(val(idx('quantity')) || '0');
-        const unitPrice = Number(val(idx('unit_price')) || '0');
+        const cells = line.match(/"([^"]|"")*"|[^,]+/g) || [];
+        const valueAt = (index: number) => (cells[index] || '').replace(/^"|"$/g, '');
+        const poNumber = valueAt(getIndex('po_number'));
 
-        if (!poGroups[poNumber]) poGroups[poNumber] = { po_number: poNumber, supplier_name: supplierName, supermarket_name: supermarketName, buyer_name: buyerName, expected_delivery_date: expectedDate, payment_terms: paymentTerms, notes, items: [] };
-        poGroups[poNumber].items.push({ product_name: productName, category_name: categoryName, quantity, unit_price: unitPrice });
+        if (!orderGroups[poNumber]) {
+          orderGroups[poNumber] = {
+            po_number: poNumber,
+            supplier_name: valueAt(getIndex('supplier_name')),
+            supermarket_name: valueAt(getIndex('supermarket_name')),
+            buyer_name: valueAt(getIndex('buyer_name')),
+            expected_delivery_date: normalizeDate(valueAt(getIndex('expected_delivery_date'))),
+            payment_terms: valueAt(getIndex('payment_terms')),
+            notes: valueAt(getIndex('notes')),
+            items: [],
+          };
+        }
+
+        orderGroups[poNumber].items.push({
+          product_name: valueAt(getIndex('product_name')),
+          quantity: Number(valueAt(getIndex('quantity')) || '0'),
+          unit_price: Number(valueAt(getIndex('unit_price')) || '0'),
+        });
       }
 
-      for (const key of Object.keys(poGroups)) {
-        const group = poGroups[key];
-        const smName = (group.supermarket_name || poForm.supermarketName || '').trim();
-        if (!smName) { console.warn('Skipping PO due to missing supermarket name:', group); continue; }
+      for (const key of Object.keys(orderGroups)) {
+        const group = orderGroups[key];
+        const storeName = (group.supermarket_name || poForm.supermarketName || '').trim();
+        if (!storeName) continue;
 
-        // Map supermarket name -> id if available
-        const smId = smByName.get(smName.toLowerCase());
+        const supplier = suppliers.find(
+          (item) => item.name.trim().toLowerCase() === group.supplier_name.trim().toLowerCase()
+        );
 
-        // Map supplier name to supplier ID
-        const supplierObj = suppliers.find(s => s.name.trim().toLowerCase() === group.supplier_name.trim().toLowerCase());
-        const supplierId = supplierObj ? supplierObj.id : null;
-        if (!supplierId) {
-          setError(`Supplier "${group.supplier_name}" not found. Please add the supplier first.`);
-          console.warn('Skipping PO due to missing supplier:', group);
+        if (!supplier) {
+          setError(`Supplier "${group.supplier_name}" not found. Please add it first.`);
           continue;
         }
 
-        const items = group.items.map((it: any) => ({ product_text: it.product_name, quantity: Number(it.quantity||0), unit_price: Number(it.unit_price||0) }));
-        const payload: any = {
-          supplier: supplierId,
-          // Omit po_number so backend auto-generates it
+        let supermarketId = storeByName.get(storeName.toLowerCase());
+        if (!supermarketId) {
+          try {
+            supermarketId = await MappingService.getSupermarketId(storeName);
+          } catch (mappingError: any) {
+            setError(mappingError?.message || 'Could not find one of the stores in your CSV.');
+            continue;
+          }
+        }
+
+        await PurchaseOrderService.create({
+          supplier: supplier.id,
+          supermarket: supermarketId,
           expected_delivery_date: group.expected_delivery_date || undefined,
           payment_terms: group.payment_terms || undefined,
           buyer_name: group.buyer_name || undefined,
           notes: group.notes || undefined,
-          items,
-        };
-
-        // Always resolve supermarket name to ID (auto-create if missing)
-        let supermarketId = smId;
-        if (!supermarketId) {
-          try {
-            supermarketId = await MappingService.getSupermarketId(smName);
-          } catch (e) {
-            const msg = (e as any)?.message || 'Could not resolve supermarket';
-            console.warn('Skipping PO due to supermarket resolution failure:', { smName, msg, group });
-            setError(`PO ${group.po_number || '(no number)'}: ${msg}`);
-            continue; // skip this PO entry
-          }
-        }
-        payload.supermarket = supermarketId;
-
-        console.log('Uploading PO payload:', payload);
-        try {
-          const resp = await PurchaseOrderService.create(payload);
-          console.log('PO upload response:', resp);
-        } catch (err: any) {
-          const msg = err?.message || 'Upload failed';
-          console.error('PO upload error:', err);
-          setError(`PO ${group.po_number || '(no number)'}: ${msg}`);
-        }
+          items: group.items.map((item: any) => ({
+            product_text: item.product_name,
+            quantity: Number(item.quantity || 0),
+            unit_price: Number(item.unit_price || 0),
+          })),
+        });
       }
-      const res = await PurchaseOrderService.list();
-      setPoSummary(Array.isArray(res) ? res : res.results || []);
-      alert('POs created from CSV');
-    } catch (e: any) {
-      setError(e?.message || 'Failed to import PO CSV');
-    } finally { setLoading(false); }
+
+      const refreshedOrders = await PurchaseOrderService.list();
+      setPoSummary(Array.isArray(refreshedOrders) ? refreshedOrders : refreshedOrders.results || []);
+      alert('Orders imported successfully.');
+    } catch (uploadError: any) {
+      setError(uploadError?.message || 'Failed to import the CSV file.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshOrders = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const refreshedOrders = await PurchaseOrderService.list();
+      setPoSummary(Array.isArray(refreshedOrders) ? refreshedOrders : refreshedOrders.results || []);
+    } catch (refreshError: any) {
+      setError(refreshError?.message || 'Failed to refresh orders.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const exportOrderHistory = () => {
+    const rows = [
+      ['Order #', 'Supplier', 'Store', 'Status', 'Total', 'Created'],
+      ...poSummary.map((order: any) => [
+        order.po_number || order.id,
+        order.supplier_name || order.supplier,
+        order.supermarket_name || order.supermarket,
+        order.status,
+        order.total_amount ?? '-',
+        order.created_at?.slice(0, 10),
+      ]),
+    ];
+
+    downloadCsv(rows, 'order_history.csv');
   };
 
   return (
-    <div className="space-y-12 pb-24">
-      {/* Header */}
-      <div className="bg-[#020617] rounded-[40px] p-12 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#B7F000] opacity-5 blur-[100px] -mr-32 -mt-32"></div>
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative z-10">
-          <div className="flex items-center">
-            <div className="bg-[#B7F000] p-5 rounded-2xl mr-8 rotate-3 shadow-[0_0_30px_rgba(183,240,0,0.3)]">
-              <Users className="w-12 h-12 text-[#020617]" />
-            </div>
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <span className="bg-[#B7F000]/10 text-[#B7F000] text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-[#B7F000]/20">Shipping Rules</span>
-              </div>
-              <h2 className="text-6xl font-black text-white uppercase tracking-tighter leading-none">Supplier List</h2>
-              <p className="text-gray-400 mt-4 font-medium uppercase text-sm tracking-widest max-w-md">Manage your suppliers and orders.</p>
-            </div>
+    <div className="space-y-6 pb-8">
+      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Procurement</p>
+            <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-900">Suppliers</h2>
+            <p className="mt-2 text-sm text-slate-500">Manage supplier details and create purchase orders.</p>
           </div>
-          {loading && (
-            <div className="bg-[#1e293b] border border-gray-800 p-4 rounded-3xl flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-[#B7F000] animate-pulse"></div>
-              <span className="text-white font-bold tracking-tighter uppercase text-xs">Syncing</span>
-            </div>
-          )}
+
+          <div className="flex flex-wrap items-center gap-3">
+            {loading && (
+              <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+                Updating...
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => poSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <FileText className="h-4 w-4" />
+              Go to Orders
+            </button>
+          </div>
         </div>
+
         {error && (
-          <div className="mt-8 p-6 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-4">
-            <AlertCircle className="text-red-500 w-6 h-6" />
-            <div>
-              <p className="text-red-500 text-[10px] font-black uppercase tracking-widest">Error Found</p>
-              <p className="text-white font-bold text-sm">{error}</p>
-            </div>
+          <div className="mt-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{error}</span>
           </div>
         )}
+      </section>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <SummaryCard label="Suppliers" value={suppliers.length} />
+        <SummaryCard label="Orders" value={poSummary.length} />
+        <SummaryCard label="Stores" value={supermarkets.length} />
       </div>
 
-      {/* Create/Edit Supplier */}
-      <section className="bg-[#020617] rounded-[40px] border border-gray-800 overflow-hidden shadow-2xl">
-        <div className="p-10 border-b border-gray-800 flex items-center justify-between">
+      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h3 className="text-xl font-black text-white uppercase tracking-widest">
-              {editingId ? 'Edit Supplier' : 'Add New Supplier'}
-            </h3>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Add a new supplier to the system</p>
+            <h3 className="text-lg font-bold text-slate-900">{editingId ? 'Edit Supplier' : 'Add Supplier'}</h3>
+            <p className="text-sm text-slate-500">Keep contact and payment details up to date.</p>
           </div>
-          <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
-            <Plus className="text-[#B7F000] w-6 h-6" />
-          </div>
-        </div>
-        <div className="p-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Supplier Name</label>
-              <input 
-                className="w-full bg-gray-900/50 border border-gray-800 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#B7F000]/50 focus:border-[#B7F000] transition-all font-bold placeholder:text-gray-700" 
-                placeholder="FULL NAME" 
-                value={form.name} 
-                onChange={e => setForm({ ...form, name: e.target.value })} 
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Email</label>
-              <input 
-                className="w-full bg-gray-900/50 border border-gray-800 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#B7F000]/50 focus:border-[#B7F000] transition-all font-bold placeholder:text-gray-700" 
-                placeholder="EMAIL ADDRESS" 
-                value={form.email} 
-                onChange={e => setForm({ ...form, email: e.target.value })} 
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Phone</label>
-              <input 
-                className="w-full bg-gray-900/50 border border-gray-800 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#B7F000]/50 focus:border-[#B7F000] transition-all font-bold placeholder:text-gray-700" 
-                placeholder="PHONE NUMBER" 
-                value={form.phone} 
-                onChange={e => setForm({ ...form, phone: e.target.value })} 
-              />
-            </div>
-            <div className="space-y-2 lg:col-span-1">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Address</label>
-              <input 
-                className="w-full bg-gray-900/50 border border-gray-800 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#B7F000]/50 focus:border-[#B7F000] transition-all font-bold placeholder:text-gray-700" 
-                placeholder="PHYSICAL ADDRESS" 
-                value={form.address} 
-                onChange={e => setForm({ ...form, address: e.target.value })} 
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Payment Terms (Days)</label>
-              <input 
-                className="w-full bg-gray-900/50 border border-gray-800 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#B7F000]/50 focus:border-[#B7F000] transition-all font-bold placeholder:text-gray-700" 
-                placeholder="0" 
-                type="number" 
-                min={0} 
-                value={form.credit_days} 
-                onChange={e => setForm({ ...form, credit_days: e.target.value })} 
-              />
-            </div>
-          </div>
-          <div className="mt-12 flex gap-4">
-            <button 
-              onClick={submitSupplier} 
-              className="px-10 py-5 bg-[#B7F000] text-[#020617] font-black uppercase tracking-widest rounded-2xl hover:bg-[#a2d600] transition-all shadow-[0_0_20px_rgba(183,240,0,0.2)] flex items-center gap-3"
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={submitSupplier}
+              className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
             >
-              {editingId ? <><Edit3 size={18} /> Save Changes</> : <><Plus size={18} /> Save Supplier</>}
+              {editingId ? <Edit3 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {editingId ? 'Save' : 'Add Supplier'}
             </button>
             {editingId && (
-              <button 
-                onClick={resetForm} 
-                className="px-10 py-5 bg-transparent text-white font-black uppercase tracking-widest rounded-2xl border-2 border-gray-800 hover:border-white transition-all"
+              <button
+                type="button"
+                onClick={resetForm}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
               >
                 Cancel
               </button>
             )}
           </div>
         </div>
-      </section>
 
-      {/* Supplier List */}
-      <section className="bg-white rounded-[40px] border border-[#E5E7EB] shadow-sm overflow-hidden">
-        <div className="p-10 border-b border-gray-100 flex items-center justify-between bg-[#F9FAFB]">
-          <div>
-            <h3 className="text-xl font-black text-[#020617] uppercase tracking-widest">All Suppliers</h3>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">List of your suppliers</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => {
-              const rows = [
-                ['Name','Email','Phone','Address','Payment Time','Order Count'],
-                ...suppliers.map((s: any) => {
-                  const poCount = poSummary.filter((po: any) => po.supplier === s.id || po.supplier_name === s.name).length;
-                  return [s.name, s.email||'', s.phone||'', s.address||'', String(s.credit_days ?? ''), String(poCount)];
-                })
-              ];
-              const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-              const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url; a.download = 'suppliers_list.csv'; a.click(); URL.revokeObjectURL(url);
-            }} className="flex items-center gap-2 px-6 py-3 bg-[#020617] text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-gray-800 transition-all">
-              <Download size={14} className="text-[#B7F000]" /> Export List
-            </button>
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-[#020617] text-white">
-                <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Supplier Name</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Contact</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Address</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Payment Time</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Total Orders</th>
-                <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em]">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {suppliers.map((s: any) => {
-                const poCount = poSummary.filter((po: any) => po.supplier === s.id || po.supplier_name === s.name).length;
-                return (
-                  <tr key={s.id} className="group hover:bg-[#B7F000]/5 transition-colors">
-                    <td className="px-8 py-6">
-                      <div className="flex flex-col">
-                        <span className="font-black text-[#020617] text-sm tracking-tight">{s.name}</span>
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">ID: {s.id}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-6">
-                      <div className="flex flex-col gap-1">
-                        {s.email && (
-                          <div className="flex items-center gap-2">
-                            <Mail className="w-3 h-3 text-[#B7F000]" />
-                            <span className="text-[11px] font-bold text-[#020617]">{s.email}</span>
-                          </div>
-                        )}
-                        {s.phone && (
-                          <div className="flex items-center gap-2">
-                            <Phone className="w-3 h-3 text-[#B7F000]" />
-                            <span className="text-[11px] font-bold text-[#020617]">{s.phone}</span>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-6">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-3 h-3 text-gray-400" />
-                        <span className="text-[11px] font-bold text-[#020617]">{s.address || 'UNDEFINED'}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-6">
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-3 h-3 text-[#B7F000]" />
-                        <span className="text-sm font-black text-[#020617]">{s.credit_days ?? '0'} <span className="text-[10px] text-gray-400">DAYS</span></span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-6 text-center">
-                      <span className="px-3 py-1 bg-gray-100 text-[#020617] text-[10px] font-black rounded-full border border-gray-200">{poCount} Orders</span>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => {
-                            setPoForm(prev => ({ ...prev, supplierId: String(s.id) }));
-                            const el = document.getElementById('po-section');
-                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }}
-                          className="flex items-center gap-2 px-4 py-2 bg-[#B7F000] text-[#020617] text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#a2d600] transition-all"
-                        >
-                          <Plus size={14} /> New Order
-                        </button>
-                        <button 
-                          onClick={() => startEdit(s)} 
-                          className="p-2 text-gray-400 hover:text-[#020617] hover:bg-gray-100 rounded-xl transition-all"
-                        >
-                          <Edit3 size={16} />
-                        </button>
-                        <button 
-                          onClick={() => removeSupplier(s.id)} 
-                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <Field label="Supplier Name" value={form.name} onChange={(value) => setForm((state) => ({ ...state, name: value }))} placeholder="Supplier name" />
+          <Field label="Email" value={form.email} onChange={(value) => setForm((state) => ({ ...state, email: value }))} placeholder="Email address" />
+          <Field label="Phone" value={form.phone} onChange={(value) => setForm((state) => ({ ...state, phone: value }))} placeholder="Phone number" />
+          <Field label="Address" value={form.address} onChange={(value) => setForm((state) => ({ ...state, address: value }))} placeholder="Street, city" />
+          <Field label="Payment Days" value={form.credit_days} onChange={(value) => setForm((state) => ({ ...state, credit_days: value }))} placeholder="0" type="number" />
         </div>
       </section>
 
-
-
-
-      {/* Purchase Orders on Suppliers page */}
-      <section id="po-section" className="bg-[#020617] rounded-[40px] border border-gray-800 overflow-hidden shadow-2xl">
-        <div className="p-10 border-b border-gray-800 flex items-center justify-between">
+      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h3 className="text-xl font-black text-white uppercase tracking-widest">Order Management</h3>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Create or import orders</p>
+            <h3 className="text-lg font-bold text-slate-900">Supplier List</h3>
+            <p className="text-sm text-slate-500">Review suppliers and jump straight into new orders.</p>
           </div>
-          <div className="flex gap-4">
-            <button onClick={async () => { downloadPOExcelTemplate(); }} className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl border border-gray-800 hover:border-[#B7F000] transition-all">
-              <FileText size={14} className="text-[#B7F000]" /> Template
+          <button
+            type="button"
+            onClick={downloadSupplierCsv}
+            className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            <Download className="h-4 w-4" />
+            Export
+          </button>
+        </div>
+
+        {suppliers.length > 0 ? (
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full min-w-[860px]">
+              <thead>
+                <tr className="border-b border-slate-100 text-left">
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Supplier</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Contact</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Address</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Payment Days</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Orders</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {suppliers.map((supplier) => {
+                  const poCount = poSummary.filter(
+                    (order: any) => order.supplier === supplier.id || order.supplier_name === supplier.name
+                  ).length;
+
+                  return (
+                    <tr key={supplier.id} className="border-b border-slate-100 last:border-b-0">
+                      <td className="px-4 py-4">
+                        <p className="text-sm font-semibold text-slate-900">{supplier.name}</p>
+                        <p className="mt-1 text-xs text-slate-400">ID {supplier.id}</p>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="space-y-1.5 text-sm text-slate-600">
+                          {supplier.email && (
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4 text-slate-400" />
+                              <span>{supplier.email}</span>
+                            </div>
+                          )}
+                          {supplier.phone && (
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-4 w-4 text-slate-400" />
+                              <span>{supplier.phone}</span>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                          <MapPin className="h-4 w-4 text-slate-400" />
+                          <span>{supplier.address || 'Not added'}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                          <Clock className="h-4 w-4 text-slate-400" />
+                          <span>{supplier.credit_days ?? 0} days</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                          {poCount} orders
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPoForm((previous) => ({ ...previous, supplierId: String(supplier.id) }));
+                              poSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }}
+                            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                          >
+                            New Order
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => startEdit(supplier)}
+                            className="rounded-xl border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeSupplier(supplier.id)}
+                            className="rounded-xl border border-slate-200 p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <EmptyState
+            title="No suppliers added"
+            description="Add suppliers to streamline purchasing and create orders faster."
+          />
+        )}
+      </section>
+
+      <section ref={poSectionRef} className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900">Order Management</h3>
+            <p className="text-sm text-slate-500">Create a purchase order or import one from a CSV file.</p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={downloadPOExcelTemplate}
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <FileText className="h-4 w-4" />
+              Template
             </button>
-            <label className="flex items-center gap-2 px-6 py-3 bg-[#B7F000] text-[#020617] text-[10px] font-black uppercase tracking-widest rounded-2xl cursor-pointer hover:bg-[#a2d600] transition-all shadow-[0_0_20px_rgba(183,240,0,0.2)]">
-              <Upload size={14} /> Import CSV
-              <input type="file" accept=".csv" className="hidden" onChange={e => e.target.files && handlePOCsvUpload(e.target.files[0])} />
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
+              <Upload className="h-4 w-4" />
+              Import CSV
+              <input
+                type="file"
+                accept=".csv"
+                className="hidden"
+                onChange={(event) => event.target.files && handlePOCsvUpload(event.target.files[0])}
+              />
             </label>
           </div>
         </div>
 
-        <div className="p-12 space-y-12">
-          {/* Manual PO Form */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Supplier</label>
-              <select 
-                className="w-full bg-gray-900/50 border border-gray-800 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#B7F000]/50 focus:border-[#B7F000] transition-all font-bold appearance-none cursor-pointer" 
-                value={poForm.supplierId} 
-                onChange={e => setPoForm({ ...poForm, supplierId: e.target.value })}
-              >
-                <option value="">Select Supplier</option>
-                {supplierOptions.map(o => <option key={o.value} value={o.value} className="bg-[#020617]">{o.label}</option>)}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Store Name</label>
-              <input 
-                className="w-full bg-gray-900/50 border border-gray-800 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#B7F000]/50 focus:border-[#B7F000] transition-all font-bold placeholder:text-gray-700" 
-                placeholder="STORE NAME" 
-                value={poForm.supermarketName} 
-                onChange={e => setPoForm({ ...poForm, supermarketName: e.target.value })} 
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Delivery Date</label>
-              <input 
-                type="date" 
-                className="w-full bg-gray-900/50 border border-gray-800 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#B7F000]/50 focus:border-[#B7F000] transition-all font-bold [color-scheme:dark]" 
-                value={poForm.expectedDate} 
-                onChange={e => setPoForm({ ...poForm, expectedDate: e.target.value })} 
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Payment Terms</label>
-              <input 
-                className="w-full bg-gray-900/50 border border-gray-800 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#B7F000]/50 focus:border-[#B7F000] transition-all font-bold placeholder:text-gray-700" 
-                placeholder="PAYMENT TERMS (e.g. Net 30)" 
-                value={poForm.paymentTerms} 
-                onChange={e => setPoForm({ ...poForm, paymentTerms: e.target.value })} 
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Buyer Name</label>
-              <input 
-                className="w-full bg-gray-900/50 border border-gray-800 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#B7F000]/50 focus:border-[#B7F000] transition-all font-bold placeholder:text-gray-700" 
-                placeholder="YOUR NAME" 
-                value={poForm.buyerName} 
-                onChange={e => setPoForm({ ...poForm, buyerName: e.target.value })} 
-              />
-            </div>
-            <div className="space-y-2 lg:col-span-3">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Notes</label>
-              <textarea 
-                className="w-full bg-gray-900/50 border border-gray-800 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#B7F000]/50 focus:border-[#B7F000] transition-all font-bold placeholder:text-gray-700 min-h-[100px]" 
-                value={poForm.notes} 
-                onChange={e => setPoForm({ ...poForm, notes: e.target.value })} 
-              />
-            </div>
-          </div>
-
-          <div className="bg-gray-900/30 rounded-3xl border border-gray-800/50 p-8">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <Package className="text-[#B7F000] w-5 h-5" />
-                <h4 className="font-black text-white uppercase tracking-widest text-sm">Order Items</h4>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPoItems(prev => [...prev, { productName: '', quantity: '1', unitPrice: '0' }])}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gray-800 text-white text-[10px] font-black uppercase tracking-widest rounded-xl border border-gray-700 hover:border-[#B7F000] transition-all"
-              >
-                <Plus size={14} /> Add Another Item
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {poItems.map((it, idx) => (
-                <div key={idx} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end bg-gray-900/20 p-6 rounded-2xl border border-gray-800/30 group">
-                  <div className="md:col-span-2 space-y-2">
-                    <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest ml-1">Item Name</label>
-                    <input
-                      className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-5 py-3 text-white text-sm focus:outline-none focus:border-[#B7F000] transition-all font-bold"
-                      placeholder="e.g., Apple"
-                      value={it.productName}
-                      onChange={e => setPoItems(prev => prev.map((row, i) => i === idx ? { ...row, productName: e.target.value } : row))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest ml-1">How Many</label>
-                    <input
-                      type="number"
-                      min={1}
-                      className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-5 py-3 text-white text-sm focus:outline-none focus:border-[#B7F000] transition-all font-bold"
-                      value={it.quantity}
-                      onChange={e => setPoItems(prev => prev.map((row, i) => i === idx ? { ...row, quantity: e.target.value } : row))}
-                    />
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1 space-y-2">
-                      <label className="text-[9px] font-black text-gray-600 uppercase tracking-widest ml-1">Price Each</label>
-                      <input
-                        type="number"
-                        min={0}
-                        step={0.01}
-                        className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-5 py-3 text-white text-sm focus:outline-none focus:border-[#B7F000] transition-all font-bold"
-                        value={it.unitPrice}
-                        onChange={e => setPoItems(prev => prev.map((row, i) => i === idx ? { ...row, unitPrice: e.target.value } : row))}
-                      />
-                    </div>
-                    {poItems.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => setPoItems(prev => prev.filter((_, i) => i !== idx))}
-                        className="p-3 text-gray-600 hover:text-red-500 transition-colors mt-6"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    )}
-                  </div>
-                </div>
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <SelectField
+            label="Supplier"
+            value={poForm.supplierId}
+            onChange={(value) => setPoForm((state) => ({ ...state, supplierId: value }))}
+            options={[
+              { value: '', label: 'Select supplier' },
+              ...suppliers.map((supplier) => ({ value: String(supplier.id), label: supplier.name })),
+            ]}
+          />
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Store Name
+            </label>
+            <input
+              list="stockive-store-list"
+              value={poForm.supermarketName}
+              onChange={(event) => setPoForm((state) => ({ ...state, supermarketName: event.target.value }))}
+              placeholder="Main Store"
+              className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
+            />
+            <datalist id="stockive-store-list">
+              {supermarkets.map((store) => (
+                <option key={store.id} value={store.name} />
               ))}
-            </div>
+            </datalist>
           </div>
+          <Field
+            label="Delivery Date"
+            value={poForm.expectedDate}
+            onChange={(value) => setPoForm((state) => ({ ...state, expectedDate: value }))}
+            placeholder=""
+            type="date"
+          />
+          <Field
+            label="Payment Terms"
+            value={poForm.paymentTerms}
+            onChange={(value) => setPoForm((state) => ({ ...state, paymentTerms: value }))}
+            placeholder="Net 30"
+          />
+          <Field
+            label="Buyer Name"
+            value={poForm.buyerName}
+            onChange={(value) => setPoForm((state) => ({ ...state, buyerName: value }))}
+            placeholder="Your name"
+          />
+          <div className="md:col-span-2 xl:col-span-3">
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Notes
+            </label>
+            <textarea
+              rows={3}
+              value={poForm.notes}
+              onChange={(event) => setPoForm((state) => ({ ...state, notes: event.target.value }))}
+              className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
+              placeholder="Optional notes for this order"
+            />
+          </div>
+        </div>
 
-          <div className="flex justify-end pt-4">
-            <button 
-              onClick={submitPO} 
-              className="px-12 py-5 bg-[#B7F000] text-[#020617] font-black uppercase tracking-widest rounded-2xl hover:bg-[#a2d600] transition-all shadow-[0_0_30px_rgba(183,240,0,0.3)] flex items-center gap-3"
+        <div className="mt-6 rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-sm font-bold text-slate-900">Order Items</h4>
+              <p className="text-xs text-slate-500">Add the products you want to order.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setPoItems((previous) => [...previous, { productName: '', quantity: '1', unitPrice: '0' }])
+              }
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             >
-              <CheckCircle size={20} /> Create Order
+              Add Item
             </button>
           </div>
+
+          <div className="mt-4 space-y-3">
+            {poItems.map((item, index) => (
+              <div key={index} className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-[minmax(0,2fr)_120px_140px_auto]">
+                <Field
+                  label="Item Name"
+                  value={item.productName}
+                  onChange={(value) =>
+                    setPoItems((previous) =>
+                      previous.map((row, rowIndex) => (rowIndex === index ? { ...row, productName: value } : row))
+                    )
+                  }
+                  placeholder="Apple, Milk, Rice..."
+                />
+                <Field
+                  label="Quantity"
+                  value={item.quantity}
+                  onChange={(value) =>
+                    setPoItems((previous) =>
+                      previous.map((row, rowIndex) => (rowIndex === index ? { ...row, quantity: value } : row))
+                    )
+                  }
+                  placeholder="1"
+                  type="number"
+                />
+                <Field
+                  label="Price Each"
+                  value={item.unitPrice}
+                  onChange={(value) =>
+                    setPoItems((previous) =>
+                      previous.map((row, rowIndex) => (rowIndex === index ? { ...row, unitPrice: value } : row))
+                    )
+                  }
+                  placeholder="0.00"
+                  type="number"
+                />
+                <div className="flex items-end justify-end">
+                  {poItems.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setPoItems((previous) => previous.filter((_, rowIndex) => rowIndex !== index))}
+                      className="rounded-xl border border-slate-200 p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-5 flex justify-end">
+          <button
+            type="button"
+            onClick={submitPO}
+            className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+          >
+            <CheckCircle className="h-4 w-4" />
+            Create Order
+          </button>
         </div>
       </section>
 
-      {/* PO Summary (quick view) */}
-      <section className="bg-white rounded-[40px] border border-[#E5E7EB] shadow-sm overflow-hidden">
-        <div className="p-10 border-b border-gray-100 flex items-center justify-between bg-[#F9FAFB]">
+      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h3 className="text-xl font-black text-[#020617] uppercase tracking-widest">Order History</h3>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">List of all your orders</p>
+            <h3 className="text-lg font-bold text-slate-900">Order History</h3>
+            <p className="text-sm text-slate-500">Review all purchase orders in one list.</p>
           </div>
-          <div className="flex gap-4">
-            <button onClick={() => {
-              const rows = [
-                ['Order#','Supplier','Store','Status','Total','Created'],
-                ...poSummary.map((po: any) => [po.po_number || po.id, po.supplier_name || po.supplier, po.supermarket_name || po.supermarket, po.status, po.total_amount ?? '-', po.created_at?.slice(0,10)])
-              ];
-              const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-              const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url; a.download = 'order_history.csv'; a.click(); URL.revokeObjectURL(url);
-            }} className="flex items-center gap-2 px-6 py-3 bg-white text-[#020617] text-[10px] font-black uppercase tracking-widest rounded-2xl border border-gray-200 hover:border-[#020617] transition-all">
-              <Download size={14} className="text-[#B7F000]" /> Export List
-            </button>
-            <button 
-              onClick={async () => {
-                setLoading(true); setError('');
-                try { const res = await PurchaseOrderService.list(); const arr = Array.isArray(res) ? res : res.results || []; setPoSummary(arr); }
-                catch (e: any) { setError(e?.message || 'Failed to refresh orders'); }
-                finally { setLoading(false); }
-              }} 
-              className="flex items-center gap-2 px-6 py-3 bg-[#020617] text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-gray-800 transition-all"
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={exportOrderHistory}
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             >
-              <RefreshCw size={14} className="text-[#B7F000]" /> Sync Orders
+              <Download className="h-4 w-4" />
+              Export
+            </button>
+            <button
+              type="button"
+              onClick={refreshOrders}
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh
             </button>
           </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-[#020617] text-white">
-                <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Order #</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Supplier</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Store</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Status</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em]">Total Price</th>
-                <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em]">Date Created</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {poSummary.map((po: any) => (
-                <tr key={po.id} className="group hover:bg-[#B7F000]/5 transition-colors">
-                  <td className="px-8 py-6">
-                    <span className="font-black text-[#020617] text-sm tracking-tighter">#{po.po_number || po.id}</span>
-                  </td>
-                  <td className="px-6 py-6">
-                    <span className="text-[11px] font-bold text-[#020617] uppercase tracking-tight">{po.supplier_name || po.supplier}</span>
-                  </td>
-                  <td className="px-6 py-6">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3 h-3 text-[#B7F000]" />
-                      <span className="text-[11px] font-bold text-[#020617]">{po.supermarket_name || po.supermarket}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-6">
-                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-                      po.status === 'Completed' ? 'bg-green-50 text-green-600 border-green-200' :
-                      po.status === 'Pending' ? 'bg-yellow-50 text-yellow-600 border-yellow-200' :
-                      'bg-gray-50 text-gray-600 border-gray-200'
-                    }`}>
-                      {po.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-6">
-                    <span className="text-sm font-black text-[#020617]">${Number(po.total_amount ?? 0).toLocaleString()}</span>
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{po.created_at?.slice(0,10)}</span>
-                  </td>
+
+        {poSummary.length > 0 ? (
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full min-w-[760px]">
+              <thead>
+                <tr className="border-b border-slate-100 text-left">
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Order #</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Supplier</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Store</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Status</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Total</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Created</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {poSummary.map((order: any) => (
+                  <tr key={order.id} className="border-b border-slate-100 last:border-b-0">
+                    <td className="px-4 py-4 text-sm font-semibold text-slate-900">#{order.po_number || order.id}</td>
+                    <td className="px-4 py-4 text-sm text-slate-700">{order.supplier_name || order.supplier}</td>
+                    <td className="px-4 py-4 text-sm text-slate-700">{order.supermarket_name || order.supermarket}</td>
+                    <td className="px-4 py-4">
+                      <StatusBadge status={order.status} />
+                    </td>
+                    <td className="px-4 py-4 text-sm font-semibold text-slate-900">
+                      ${Number(order.total_amount ?? 0).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-4 text-right text-sm text-slate-500">
+                      {order.created_at?.slice(0, 10)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <EmptyState
+            title="No orders yet"
+            description="Create your first order to start tracking purchasing."
+          />
+        )}
       </section>
     </div>
   );
 }
+
+const SummaryCard = ({ label, value }: { label: string; value: number }) => (
+  <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+    <p className="text-sm font-medium text-slate-500">{label}</p>
+    <p className="mt-2 text-3xl font-black tracking-tight text-slate-900">{value}</p>
+  </div>
+);
+
+const Field = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = 'text',
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  type?: string;
+}) => (
+  <div>
+    <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+      {label}
+    </label>
+    <input
+      type={type}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
+    />
+  </div>
+);
+
+const SelectField = ({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+}) => (
+  <div>
+    <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+      {label}
+    </label>
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const normalized = String(status || '').toUpperCase();
+  const classes =
+    normalized === 'COMPLETED' || normalized === 'RECEIVED'
+      ? 'bg-emerald-50 text-emerald-700'
+      : normalized === 'PENDING'
+        ? 'bg-amber-50 text-amber-700'
+        : 'bg-slate-100 text-slate-700';
+
+  return (
+    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${classes}`}>
+      {status || 'Pending'}
+    </span>
+  );
+};
+
+const EmptyState = ({ title, description }: { title: string; description: string }) => (
+  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-12 text-center">
+    <Users className="mx-auto h-10 w-10 text-slate-300" />
+    <h4 className="mt-4 text-lg font-bold text-slate-900">{title}</h4>
+    <p className="mt-2 text-sm text-slate-500">{description}</p>
+  </div>
+);
+
+const downloadCsv = (rows: string[][], fileName: string) => {
+  const csv = rows
+    .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+};

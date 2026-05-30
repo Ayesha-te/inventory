@@ -19,42 +19,42 @@ const HelpPage: React.FC = () => {
   const categories = [
     {
       title: 'Getting Started',
-      description: 'Learn the basics of Stockive and how to set up your first store.',
+      description: 'Learn how to set up your account and start using your store.',
       icon: <PlayCircle className="text-blue-500" />,
-      articles: ['Initial Setup Guide', 'Adding Your First Product', 'Understanding the Dashboard']
+      articles: ['Set Up Your Store', 'Add Your First Product', 'Read the Dashboard']
     },
     {
-      title: 'Inventory Management',
-      description: 'Advanced tools for tracking and managing your stock levels.',
+      title: 'Products & Stock',
+      description: 'Simple ways to add products and keep stock up to date.',
       icon: <Package className="text-green-500" />,
-      articles: ['Bulk Import with Excel', 'Setting Low Stock Alerts', 'Using the Barcode Scanner']
+      articles: ['Upload Products from Excel', 'Set Low Stock Warnings', 'Use the Barcode Scanner']
     },
     {
       title: 'Sales & Orders',
-      description: 'How to manage multi-channel sales and order fulfillment.',
+      description: 'Manage incoming orders and keep your sales channels in sync.',
       icon: <ShoppingCart className="text-orange-500" />,
-      articles: ['Processing Orders', 'Multi-Channel Integration', 'Generating Invoices']
+      articles: ['Manage Orders', 'Connect Sales Channels', 'Create Invoices']
     },
     {
       title: 'Settings & Account',
-      description: 'Manage your profile, team members, and store configurations.',
+      description: 'Update your profile, team access, and store settings.',
       icon: <FileText className="text-purple-500" />,
-      articles: ['Subscription Plans', 'User Permissions', 'API Access']
+      articles: ['Plans & Billing', 'Team Access', 'Store Settings']
     }
   ];
 
   const faqs = [
     {
       question: "How do I import products from Excel?",
-      answer: "Navigate to 'Add Products' and select the 'Excel Upload' tab. You can download our template, fill it with your product data, and then upload it back to the system."
+      answer: "Open 'Add Products', choose 'Excel Upload', download the template, fill it in, and upload your file."
     },
     {
       question: "Can I sync with my existing POS system?",
-      answer: "Yes, Stockive supports various POS integrations. Go to the 'POS Sync' section to configure your specific system connection."
+      answer: "Yes. Open 'POS Connection' to connect your store system and keep products and stock updated."
     },
     {
       question: "What happens when stock reaches the minimum level?",
-      answer: "Stockive will automatically generate a low stock alert on your dashboard and send a notification to your registered email address."
+      answer: "Stockive will show a low stock warning on your dashboard and can also send you an email update."
     }
   ];
 
@@ -65,7 +65,7 @@ const HelpPage: React.FC = () => {
         <div className="relative z-10 max-w-2xl">
           <h1 className="text-4xl font-black mb-4 tracking-tight">How can we help you?</h1>
           <p className="text-slate-400 text-lg mb-8 font-medium">
-            Search our documentation or browse categories below to find answers to your questions.
+            Search our help articles or browse the topics below to find what you need.
           </p>
           <div className="relative max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
@@ -126,7 +126,7 @@ const HelpPage: React.FC = () => {
         <div className="md:col-span-2 bg-[#B7F000] rounded-[40px] p-12 flex flex-col md:flex-row items-center justify-between gap-8">
           <div>
             <h2 className="text-3xl font-black text-black mb-2 tracking-tight">Still need help?</h2>
-            <p className="text-black/60 font-bold">Our support team is available 24/7 to assist you with any issues.</p>
+            <p className="text-black/60 font-bold">Our support team can help with setup, products, and store settings.</p>
           </div>
           <button className="bg-black text-white px-10 py-4 rounded-2xl font-black shadow-lg hover:shadow-xl hover:scale-105 transition-all">
             Contact Support
@@ -135,7 +135,7 @@ const HelpPage: React.FC = () => {
         <div className="bg-white rounded-[40px] border border-slate-200 p-10 flex flex-col items-center justify-center text-center">
           <LifeBuoy size={48} className="text-slate-900 mb-4" />
           <h3 className="font-black text-slate-900 mb-2">Live Chat</h3>
-          <p className="text-slate-500 text-sm font-medium mb-6">Average response time: 2 mins</p>
+          <p className="text-slate-500 text-sm font-medium mb-6">Typical reply time: about 2 minutes</p>
           <button className="text-[#B7F000] font-black text-sm flex items-center gap-2 hover:underline">
             Start Conversation <ExternalLink size={14} />
           </button>

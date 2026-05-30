@@ -111,7 +111,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
       });
 
     } catch (err: any) {
-      const msg = err?.message || 'Failed to process image. Please try again.';
+      const msg = err?.message || 'We could not read this photo. Please try again.';
       setError(msg);
     } finally {
       setIsProcessing(false);
@@ -150,8 +150,8 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
               <Camera className="w-8 h-8 text-[#020617] -rotate-3" />
             </div>
             <div>
-              <h2 className="text-4xl font-black text-slate-900 tracking-tight uppercase">Visual Scan</h2>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Analyze product photos for automated data mapping.</p>
+              <h2 className="text-4xl font-black text-slate-900 tracking-tight uppercase">Photo Scan</h2>
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Use a product photo to fill in details automatically.</p>
             </div>
           </div>
           <button
@@ -170,9 +170,9 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
               <HelpCircle className="w-6 h-6 text-[#020617]" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-black text-white uppercase tracking-tight mb-2">Capture Guidelines</h3>
+              <h3 className="text-lg font-black text-white uppercase tracking-tight mb-2">Photo Tips</h3>
               <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-8 leading-relaxed">
-                Follow these tips to ensure accurate data extraction and high-fidelity asset recognition.
+                Follow these tips to help the app read your product photo clearly.
               </p>
               <div className="flex flex-wrap gap-4">
                 <button
@@ -180,13 +180,13 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                   className="px-6 py-3 bg-[#B7F000] hover:bg-[#A3D900] text-[#020617] rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-[0_8px_20px_rgba(183,240,0,0.3)] flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
-                  Get Protocol Guide
+                  Download Guide
                 </button>
                 <button
                   onClick={() => setShowGuide(!showGuide)}
                   className="px-6 py-3 text-[10px] font-black text-[#B7F000] uppercase tracking-widest hover:underline"
                 >
-                  {showGuide ? 'Hide' : 'Show'} Expert Tips
+                  {showGuide ? 'Hide' : 'Show'} Tips
                 </button>
               </div>
             </div>
@@ -198,7 +198,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
           <div className="bg-slate-50 rounded-[32px] p-8 border border-slate-200 mb-12 animate-in fade-in slide-in-from-top-4 z-10 relative">
             <h4 className="font-black text-slate-900 uppercase tracking-widest text-[10px] mb-8 flex items-center gap-3">
               <span className="w-1.5 h-4 bg-[#B7F000] rounded-full"></span>
-              Optical Capture Requirements
+               Photo Checklist
             </h4>
             <div className="grid md:grid-cols-2 gap-12">
               <div>
@@ -226,17 +226,17 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
             </div>
             <div className="mt-12 grid md:grid-cols-3 gap-6">
               <div className="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm">
-                <h6 className="font-black text-[9px] text-emerald-600 uppercase tracking-widest mb-3">Commit List</h6>
+                <h6 className="font-black text-[9px] text-emerald-600 uppercase tracking-widest mb-3">The App Can Read</h6>
                 <ul className="text-[10px] text-emerald-800 space-y-1.5 font-black uppercase tracking-widest">
                   <li>✓ Product identity</li>
                   <li>✓ Brand origin</li>
                   <li>✓ Mass / Volume</li>
-                  <li>✓ Optical barcode</li>
+                  <li>✓ Clear barcode</li>
                   <li>✓ Price point</li>
                 </ul>
               </div>
               <div className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm">
-                <h6 className="font-black text-[9px] text-red-600 uppercase tracking-widest mb-3">Avoidance</h6>
+                <h6 className="font-black text-[9px] text-red-600 uppercase tracking-widest mb-3">Avoid</h6>
                 <ul className="text-[10px] text-red-800 space-y-1.5 font-black uppercase tracking-widest">
                   <li>✗ Lens blur</li>
                   <li>✗ Glare & flare</li>
@@ -245,7 +245,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                 </ul>
               </div>
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                <h6 className="font-black text-[9px] text-slate-900 uppercase tracking-widest mb-3">Best Practices</h6>
+                <h6 className="font-black text-[9px] text-slate-900 uppercase tracking-widest mb-3">Best Results</h6>
                 <ul className="text-[10px] text-slate-400 space-y-1.5 font-black uppercase tracking-widest">
                   <li>✓ Uniform lux</li>
                   <li>✓ Orthogonal angle</li>
@@ -263,9 +263,9 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
               <div className="bg-white w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-sm">
                 <Camera className="w-12 h-12 text-[#B7F000]" />
               </div>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-4 uppercase">Initialize Optical Scan</h3>
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-4 uppercase">Upload a Product Photo</h3>
               <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-lg mx-auto leading-relaxed">
-                Capture or upload a clear photo of the asset label for automated data extraction.
+                Take or upload a clear photo of the product label to fill in details automatically.
               </p>
               
               <input
@@ -283,7 +283,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                   className="px-10 py-5 bg-[#B7F000] hover:bg-[#A3D900] text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-[0_8px_25px_rgba(183,240,0,0.3)] hover:shadow-[0_12px_30px_rgba(183,240,0,0.4)] hover:-translate-y-1 flex items-center gap-3"
                 >
                   <Camera className="w-5 h-5" />
-                  Live Capture
+                  Take Photo
                 </button>
                 <button
                   onClick={() => {
@@ -295,7 +295,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                   className="px-10 py-5 bg-slate-900 text-[#B7F000] rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:shadow-2xl hover:-translate-y-1 flex items-center gap-3"
                 >
                   <Image className="w-5 h-5" />
-                  Upload Frame
+                  Upload Photo
                 </button>
               </div>
             </div>
@@ -308,10 +308,10 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                 </h4>
                 <ul className="space-y-4">
                   {[
-                    'Product Identity & Brand',
-                    'Price Point & Weight',
-                    'Barcode & Category',
-                    'Expiry Date Protocol'
+                    'Product name and brand',
+                    'Price and weight',
+                    'Barcode and category',
+                    'Expiry date'
                   ].map((item, i) => (
                     <li key={i} className="flex items-center gap-3">
                       <div className="w-5 h-5 bg-[#B7F000]/10 rounded-lg flex items-center justify-center border border-[#B7F000]/20">
@@ -327,7 +327,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/10 transition-all"></div>
                 <h4 className="font-black text-white mb-6 uppercase tracking-widest text-[10px] flex items-center gap-3 relative z-10">
                   <span className="w-1.5 h-3 bg-[#B7F000] rounded-full"></span>
-                  Quick Protocol
+                  Quick Tips
                 </h4>
                 <ul className="space-y-4 relative z-10">
                   {[
@@ -360,7 +360,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                   className="w-48 h-48 object-cover rounded-[32px] mx-auto shadow-2xl border-4 border-white relative z-0"
                 />
                 <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-[#B7F000] text-slate-900 px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-xl z-20 animate-bounce">
-                  Scanning Asset
+                  Reading Photo
                 </div>
               </div>
             )}
@@ -375,9 +375,9 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                   ></div>
                 ))}
               </div>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-3 uppercase">Analyzing Frame</h3>
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-3 uppercase">Reading Your Photo</h3>
               <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] leading-relaxed">
-                The Optical Intelligence Engine is extracting asset parameters and validating brand authenticity.
+                We are reading the label and pulling out the product details.
               </p>
             </div>
           </div>
@@ -389,7 +389,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
               <AlertCircle className="w-8 h-8 text-red-500" />
             </div>
             <div>
-              <h4 className="font-black text-red-900 uppercase tracking-widest text-[10px] mb-2">Protocol Exception</h4>
+              <h4 className="font-black text-red-900 uppercase tracking-widest text-[10px] mb-2">Could Not Read Photo</h4>
               <p className="text-red-700 font-bold text-xs uppercase tracking-tight mb-4 leading-relaxed">{error}</p>
               <button
                 onClick={() => {
@@ -398,7 +398,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                 }}
                 className="px-6 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all"
               >
-                Reset Ingress Stream
+                Try Another Photo
               </button>
             </div>
           </div>
@@ -424,7 +424,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                       <CheckCircle className="w-5 h-5 text-slate-900" />
                     </div>
                     <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">
-                      Asset Decoded
+                      Details Found
                     </h3>
                   </div>
                   <div className="space-y-4 relative z-10">
@@ -432,10 +432,10 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                       <span className="text-5xl font-black text-slate-900 tracking-tighter">
                         {Math.round(extractedData.confidence * 100)}%
                       </span>
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Confidence Level</span>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Confidence</span>
                     </div>
                     <p className="text-slate-500 text-xs font-bold uppercase tracking-widest leading-relaxed">
-                      High-fidelity recognition of asset parameters achieved. Verify decoded metadata below.
+                      We found product details from the photo. Please check them before saving.
                     </p>
                   </div>
                 </div>
@@ -443,15 +443,15 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                 <div className="bg-white rounded-[32px] p-8 border border-slate-200 shadow-sm">
                   <h4 className="font-black text-slate-900 mb-6 uppercase tracking-widest text-[10px] flex items-center gap-3">
                     <span className="w-1.5 h-4 bg-[#B7F000] rounded-full"></span>
-                    Decoded Parameters
+                    Found Details
                   </h4>
                   <div className="space-y-4">
                     {[
-                      { label: 'Asset Identity', value: extractedData.name },
-                      { label: 'Brand Origin', value: extractedData.brand },
-                      { label: 'Market Value', value: extractedData.price ? `$${extractedData.price}` : null },
-                      { label: 'Net Weight', value: extractedData.weight },
-                      { label: 'Classification', value: extractedData.category }
+                       { label: 'Product Name', value: extractedData.name },
+                       { label: 'Brand', value: extractedData.brand },
+                       { label: 'Price', value: extractedData.price ? `$${extractedData.price}` : null },
+                       { label: 'Weight', value: extractedData.weight },
+                       { label: 'Category', value: extractedData.category }
                     ].map((field, i) => (
                       <div key={i} className="flex items-center justify-between pb-4 border-b border-slate-50 last:border-0 last:pb-0">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{field.label}</span>
@@ -469,31 +469,31 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                 <div className="bg-slate-900 p-3 rounded-xl rotate-3 shadow-lg">
                   <Edit3 className="w-6 h-6 text-[#B7F000] -rotate-3" />
                 </div>
-                <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Final Registry Protocol</h3>
+                <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Review and Save</h3>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8 relative z-10">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Asset Identity *</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Product Name *</label>
                   <input
                     type="text"
                     value={editingProduct.name || ''}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="Enter asset name"
+                    placeholder="Enter product name"
                     className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 text-slate-900 font-bold text-sm focus:border-[#B7F000] focus:ring-4 focus:ring-[#B7F000]/10 transition-all outline-none"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Classification *</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category *</label>
                   <select
                     value={editingProduct.category || ''}
                     onChange={(e) => handleInputChange('category', e.target.value)}
                     className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 text-slate-900 font-bold text-sm focus:border-[#B7F000] focus:ring-4 focus:ring-[#B7F000]/10 transition-all outline-none appearance-none"
                     required
                   >
-                    <option value="">Select classification</option>
+                    <option value="">Select category</option>
                     {categories.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
@@ -501,12 +501,12 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Source Supplier *</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Supplier *</label>
                   <input
                     type="text"
                     value={editingProduct.supplier || ''}
                     onChange={(e) => handleInputChange('supplier', e.target.value)}
-                    placeholder="Enter supplier entity"
+                    placeholder="Enter supplier name"
                     className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 text-slate-900 font-bold text-sm focus:border-[#B7F000] focus:ring-4 focus:ring-[#B7F000]/10 transition-all outline-none"
                     required
                   />
@@ -525,7 +525,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Asset Value *</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Price *</label>
                     <input
                       type="number"
                       step="0.01"
@@ -539,7 +539,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Expiration Protocol *</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Expiry Date *</label>
                   <input
                     type="date"
                     value={editingProduct.expiryDate || ''}
@@ -551,7 +551,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Brand Origin</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Brand</label>
                     <input
                       type="text"
                       value={editingProduct.brand || ''}
@@ -561,7 +561,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mass / Volume</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Weight / Size</label>
                     <input
                       type="text"
                       value={editingProduct.weight || ''}
@@ -594,7 +594,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                       <div className={`w-6 h-6 rounded-lg border-2 transition-all mr-4 flex items-center justify-center ${addToMultipleStores ? 'bg-[#B7F000] border-[#B7F000]' : 'border-slate-200 bg-slate-50'}`}>
                         {addToMultipleStores && <CheckCircle className="w-4 h-4 text-slate-900" />}
                       </div>
-                      <span className="text-sm font-black text-slate-900 uppercase tracking-widest">Global Sync Protocol</span>
+                      <span className="text-sm font-black text-slate-900 uppercase tracking-widest">Add to More Than One Store</span>
                     </label>
                   </div>
 
@@ -618,12 +618,12 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                         <div className={`w-5 h-5 rounded-md border-2 transition-all mr-3 flex items-center justify-center ${addToAllStores ? 'bg-[#B7F000] border-[#B7F000]' : 'border-slate-200 bg-slate-50'}`}>
                           {addToAllStores && <CheckCircle className="w-3 h-3 text-slate-900" />}
                         </div>
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sync with all active nodes ({supermarkets.length})</span>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Add to all stores ({supermarkets.length})</span>
                       </label>
 
                       {!addToAllStores && (
                         <div className="space-y-4">
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Target Nodes</p>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Choose Stores</p>
                           <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                             {supermarkets.map(store => (
                               <label key={store.id} className="flex items-center p-4 bg-slate-50 rounded-2xl border border-slate-200 hover:border-[#B7F000]/30 transition-all cursor-pointer group">
@@ -664,7 +664,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                   }}
                   className="px-10 py-5 bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest transition-all border border-slate-200"
                 >
-                  Reject Scan
+                  Start Over
                 </button>
                 <button
                   onClick={handleConfirmProduct}
@@ -672,7 +672,7 @@ const ImageImport: React.FC<ImageImportProps> = ({ onProductExtracted, onCancel,
                   className="px-12 py-5 bg-[#B7F000] hover:bg-[#A3D900] disabled:bg-slate-100 disabled:text-slate-400 text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-[0_8px_25px_rgba(183,240,0,0.3)] hover:shadow-[0_12px_30px_rgba(183,240,0,0.4)] flex items-center justify-center gap-3 hover:-translate-y-1 active:translate-y-0"
                 >
                   <CheckCircle className="w-5 h-5" />
-                  Commit to Registry
+                  Save Product
                 </button>
               </div>
 

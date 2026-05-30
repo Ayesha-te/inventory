@@ -145,7 +145,7 @@ const ProductTicket = forwardRef<HTMLDivElement, ProductTicketProps>(({
       
       {/* Footer Branding */}
       <div className="mt-4 text-[8px] font-black theme-text-muted uppercase tracking-[0.2em] text-center border-t border-gray-100 pt-2">
-        Invanta Strategic Assets
+        Stockive Product Label
       </div>
     </div>
   );

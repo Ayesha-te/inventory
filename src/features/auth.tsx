@@ -120,7 +120,7 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
           return;
         }
         if (!supermarketName.trim()) {
-          setFieldErrors({ supermarketName: ['Supermarket name is required'] });
+          setFieldErrors({ supermarketName: ['Store name is required'] });
           setIsLoading(false);
           return;
         }
@@ -132,7 +132,7 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
       console.error('Auth error:', err);
       const parsed = parseBackendError(err);
       setFieldErrors(parsed.fields);
-      setError(parsed.general || (!Object.keys(parsed.fields).length ? (err?.message || 'Authentication failed') : ''));
+      setError(parsed.general || (!Object.keys(parsed.fields).length ? (err?.message || 'We could not complete your request.') : ''));
     } finally {
       setIsLoading(false);
     }
@@ -146,13 +146,13 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
         <div className="text-center mb-10">
           <img src={logoImage} alt="Stockive Logo" className="w-20 h-20 mx-auto mb-4 object-contain" />
           <h2 className="text-3xl font-black theme-text-primary uppercase tracking-tighter">
-            {mode === 'login' ? 'Stockive Login' : 'Stockive Register'}
+            {mode === 'login' ? 'Sign In' : 'Create Account'}
           </h2>
           <div className="h-1 w-20 bg-[#B7F000] mx-auto mt-2"></div>
           <p className="theme-text-muted mt-4 font-bold uppercase text-xs tracking-widest">
             {mode === 'login'
-              ? 'Stockive Inventory Management'
-              : 'Join the next generation of IMS'}
+              ? 'Manage your store in one place'
+              : 'Create your store account'}
           </p>
         </div>
 
@@ -203,7 +203,7 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
           )}
 
           <div>
-            <label htmlFor="email" className="form-label">Corporate Email</label>
+            <label htmlFor="email" className="form-label">Email</label>
             <input
               type="email"
               id="email"
@@ -214,7 +214,7 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
               onChange={e => setEmail(e.target.value)}
               aria-invalid={!!showFieldError('email')}
               className={`form-input ${showFieldError('email') ? 'border-red-600' : ''}`}
-              placeholder="admin@invanta.com"
+              placeholder="name@example.com"
             />
             {showFieldError('email') && (
               <p className="mt-1 text-[10px] text-red-600 font-bold uppercase">{showFieldError('email')}</p>
@@ -222,7 +222,7 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
           </div>
 
           <div>
-            <label htmlFor="password" className="form-label">Secure Password</label>
+            <label htmlFor="password" className="form-label">Password</label>
             <input
               type="password"
               id="password"
@@ -243,7 +243,7 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
           {mode === 'signup' && (
             <>
               <div>
-                <label htmlFor="confirmPassword" className="form-label">Verify Password</label>
+                <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
                 <input
                   type="password"
                   id="confirmPassword"
@@ -290,7 +290,7 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
               </div>
 
               <div>
-                <label htmlFor="subscriptionPlan" className="form-label">Subscription Plan *</label>
+                  <label htmlFor="subscriptionPlan" className="form-label">Plan *</label>
                 <select
                   id="subscriptionPlan"
                   name="subscriptionPlan"
@@ -304,13 +304,13 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
                   <option value="STANDARD">{PLAN_LABELS.STANDARD}</option>
                   <option value="PREMIUM">{PLAN_LABELS.PREMIUM}</option>
                 </select>
-                <p className="mt-1 text-[10px] theme-text-muted font-bold uppercase tracking-wider">
-                  Select a tier to tailor your experience
-                </p>
-              </div>
+                  <p className="mt-1 text-[10px] theme-text-muted font-bold uppercase tracking-wider">
+                    Choose the plan that fits your store
+                  </p>
+                </div>
 
               <div>
-                <label htmlFor="address" className="form-label">Location Address</label>
+                <label htmlFor="address" className="form-label">Store Address</label>
                 <textarea
                   id="address"
                   name="address"
@@ -332,10 +332,10 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
             {isLoading ? (
               <>
                 <div className="animate-spin h-5 w-5 border-b-2 border-primary-dark mr-3"></div>
-                Processing...
+                Please wait...
               </>
             ) : (
-              mode === 'login' ? 'Establish Session' : 'Create Credentials'
+              mode === 'login' ? 'Sign In' : 'Create Account'
             )}
           </button>
         </form>
@@ -345,13 +345,13 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
           {mode === 'login' && showSignupOption && (
             <div>
               <button type="button" className="text-[#B7F000] font-black uppercase text-xs tracking-widest hover:opacity-80 transition-opacity" onClick={showSignupOption}>
-                Need Access? Request Registration
+                Need an account? Sign up
               </button>
             </div>
           )}
           {mode === 'signup' && showLoginOption && (
             <button type="button" className="text-[#B7F000] font-black uppercase text-xs tracking-widest hover:opacity-80 transition-opacity" onClick={showLoginOption}>
-              Existing User? Return to Login
+              Already have an account? Sign in
             </button>
           )}
         </div>

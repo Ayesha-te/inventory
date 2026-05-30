@@ -79,9 +79,9 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
       } catch (error) {
         console.error('Failed to fetch categories and suppliers:', error);
         if (error instanceof Error && error.message.includes('401')) {
-          setAuthError('Authentication required. Please log in to import products.');
+          setAuthError('Please sign in before uploading products.');
         } else {
-          setAuthError('Failed to load categories and suppliers. Please try again.');
+          setAuthError('Could not load categories and suppliers. Please try again.');
         }
       }
     };
@@ -144,7 +144,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
     // Check authentication
     const token = AuthService.getToken();
     if (!token) {
-      setAuthError('Authentication required. Please log in to import products.');
+      setAuthError('Please sign in before uploading products.');
       return;
     }
 
@@ -153,7 +153,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
     const isValidUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(supermarketId);
     if (!supermarketId || supermarketId === 'default' || !isValidUUID) {
       console.log('❌ Invalid supermarket ID detected');
-      setAuthError(`Invalid supermarket ID: "${supermarketId}". Please ensure you have a valid supermarket set up and selected. If you just registered, please refresh the page and try again.`);
+      setAuthError('We could not find your selected store. Please refresh the page and try again.');
       return;
     }
     console.log('✅ Supermarket ID validation passed:', supermarketId);
@@ -248,7 +248,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
         error
       });
       
-      const errorMessage = error instanceof Error ? error.message : 'Failed to process Excel file. Please ensure it follows the required format.';
+      const errorMessage = error instanceof Error ? error.message : 'We could not read this file. Please make sure it uses the required format.';
       console.error('❌ Setting error message:', errorMessage);
 
       setUploadSession(prev => prev ? {
@@ -289,8 +289,8 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
               <FileSpreadsheet className="w-8 h-8 text-[#020617] -rotate-3" />
             </div>
             <div>
-              <h2 className="text-4xl font-black text-slate-900 tracking-tight uppercase">Bulk Import</h2>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Mass-ingest products via Excel or CSV protocols.</p>
+              <h2 className="text-4xl font-black text-slate-900 tracking-tight uppercase">Excel Upload</h2>
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Add many products from an Excel or CSV file.</p>
             </div>
           </div>
           <button
@@ -319,9 +319,9 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
                   <Info className="w-6 h-6 text-[#020617]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-black text-white uppercase tracking-tight mb-2">Ingress Protocol</h3>
+                  <h3 className="text-lg font-black text-white uppercase tracking-tight mb-2">Before You Upload</h3>
                   <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-8 leading-relaxed">
-                    Initialize your data structure by downloading the standardized template. Ensure all headers match the system logic.
+                    Download the template first so your file uses the right column names.
                   </p>
                   <div className="flex flex-wrap gap-4">
                     <button
@@ -329,20 +329,20 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
                       className="px-6 py-3 bg-[#B7F000] hover:bg-[#A3D900] text-[#020617] rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-[0_8px_20px_rgba(183,240,0,0.3)] flex items-center gap-2"
                     >
                       <Download className="w-4 h-4" />
-                      Get Template
+                      Download Template
                     </button>
                     <button
                       onClick={downloadGuide}
                       className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2"
                     >
                       <Info className="w-4 h-4 text-[#B7F000]" />
-                      Field Guide
+                      Download Guide
                     </button>
                     <button
                       onClick={() => setShowGuide(!showGuide)}
                       className="px-6 py-3 text-[10px] font-black text-[#B7F000] uppercase tracking-widest hover:underline"
                     >
-                      {showGuide ? 'Hide' : 'Show'} Specifications
+                      {showGuide ? 'Hide' : 'Show'} Instructions
                     </button>
                   </div>
                 </div>
@@ -354,20 +354,20 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
               <div className="bg-slate-50 rounded-[32px] p-8 border border-slate-200 animate-in fade-in slide-in-from-top-4">
                 <h4 className="font-black text-slate-900 uppercase tracking-widest text-[10px] mb-8 flex items-center gap-3">
                   <span className="w-1.5 h-4 bg-[#B7F000] rounded-full"></span>
-                  Data Structure Specification
+                   File Format
                 </h4>
                 <div className="grid md:grid-cols-2 gap-12">
                   <div>
-                    <h5 className="font-black text-[9px] text-slate-400 uppercase tracking-widest mb-4">Mandatory Parameters</h5>
+                    <h5 className="font-black text-[9px] text-slate-400 uppercase tracking-widest mb-4">Required Fields</h5>
                     <ul className="space-y-3">
                       {[
-                        { label: 'NAME', desc: 'Asset Nomenclature' },
-                        { label: 'CATEGORY', desc: 'Class Designation' },
-                        { label: 'SUPPLIER', desc: 'Logistics Entity' },
-                        { label: 'QUANTITY', desc: 'Density Units (Numeric)' },
-                        { label: 'COST_PRICE', desc: 'Ingress Valuation' },
-                        { label: 'SELLING_PRICE', desc: 'Market Valuation' },
-                        { label: 'EXPIRY_DATE', desc: 'Obsolescence (YYYY-MM-DD)' }
+                         { label: 'NAME', desc: 'Product name' },
+                         { label: 'CATEGORY', desc: 'Product category' },
+                         { label: 'SUPPLIER', desc: 'Supplier name' },
+                         { label: 'QUANTITY', desc: 'Number of items' },
+                         { label: 'COST_PRICE', desc: 'Buying price' },
+                         { label: 'SELLING_PRICE', desc: 'Selling price' },
+                         { label: 'EXPIRY_DATE', desc: 'Expiry date (YYYY-MM-DD)' }
                       ].map(item => (
                         <li key={item.label} className="flex items-center gap-3">
                           <span className="text-[9px] font-black bg-slate-900 text-[#B7F000] px-2 py-0.5 rounded uppercase tracking-widest w-24 text-center">
@@ -379,15 +379,15 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
                     </ul>
                   </div>
                   <div>
-                    <h5 className="font-black text-[9px] text-slate-400 uppercase tracking-widest mb-4">Optional Attributes</h5>
+                    <h5 className="font-black text-[9px] text-slate-400 uppercase tracking-widest mb-4">Optional Fields</h5>
                     <ul className="space-y-3">
                       {[
-                        { label: 'BRAND', desc: 'Origin Label' },
-                        { label: 'WEIGHT', desc: 'Mass Coefficient' },
-                        { label: 'ORIGIN', desc: 'Sovereign Source' },
-                        { label: 'DESCRIPTION', desc: 'Internal Meta-data' },
-                        { label: 'BARCODE', desc: 'Optical Index' },
-                        { label: 'LOCATION', desc: 'Depot Coordinates' }
+                         { label: 'BRAND', desc: 'Brand name' },
+                         { label: 'WEIGHT', desc: 'Size or weight' },
+                         { label: 'ORIGIN', desc: 'Country of origin' },
+                         { label: 'DESCRIPTION', desc: 'Short description' },
+                         { label: 'BARCODE', desc: 'Barcode number' },
+                         { label: 'LOCATION', desc: 'Shelf or storage area' }
                       ].map(item => (
                         <li key={item.label} className="flex items-center gap-3">
                           <span className="text-[9px] font-black bg-slate-100 text-slate-400 px-2 py-0.5 rounded border border-slate-200 uppercase tracking-widest w-24 text-center">
@@ -401,7 +401,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
                 </div>
                 <div className="mt-8 p-4 bg-[#B7F000]/5 border-l-4 border-[#B7F000] rounded-r-xl">
                   <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest">
-                    SYSTEM LOGIC: Categories and suppliers will be auto-generated upon detection if not present in core database.
+                     If a category or supplier does not exist yet, the system can create it for you.
                   </p>
                 </div>
               </div>
@@ -417,9 +417,9 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
                   <Plus className="w-6 h-6 text-[#020617]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight mb-2">Automated Provisioning</h3>
+                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight mb-2">If Something Is Missing</h3>
                   <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-6 leading-relaxed">
-                    Configure how the system handles new entity detection during the ingress process.
+                    Choose what should happen if the file includes new categories or suppliers.
                   </p>
                   <div className="grid md:grid-cols-2 gap-6">
                     <label className="flex items-center group cursor-pointer">
@@ -432,7 +432,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
                         />
                         <div className="w-12 h-7 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#B7F000]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[#020617] after:content-[''] after:absolute after:top-[3.5px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#B7F000] peer-checked:after:bg-[#020617]"></div>
                       </div>
-                      <span className="ml-4 text-[10px] font-black text-slate-900 uppercase tracking-widest group-hover:text-[#7AA100] transition-colors">Auto-Provision Categories</span>
+                      <span className="ml-4 text-[10px] font-black text-slate-900 uppercase tracking-widest group-hover:text-[#7AA100] transition-colors">Create missing categories automatically</span>
                     </label>
                     <label className="flex items-center group cursor-pointer">
                       <div className="relative">
@@ -444,7 +444,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
                         />
                         <div className="w-12 h-7 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#B7F000]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[#020617] after:content-[''] after:absolute after:top-[3.5px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#B7F000] peer-checked:after:bg-[#020617]"></div>
                       </div>
-                      <span className="ml-4 text-[10px] font-black text-slate-900 uppercase tracking-widest group-hover:text-[#7AA100] transition-colors">Auto-Provision Suppliers</span>
+                      <span className="ml-4 text-[10px] font-black text-slate-900 uppercase tracking-widest group-hover:text-[#7AA100] transition-colors">Create missing suppliers automatically</span>
                     </label>
                   </div>
                 </div>
@@ -459,8 +459,8 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
                 <div className="bg-white w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:shadow-[0_8px_30px_rgba(183,240,0,0.3)] group-hover:bg-[#B7F000] transition-all">
                   <Upload className="w-10 h-10 text-[#B7F000] group-hover:text-[#020617]" />
                 </div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2 uppercase">Select Ingress Source</h3>
-                <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-8">Drop your spreadsheet here or click to browse files.</p>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2 uppercase">Choose a File</h3>
+                <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-8">Drop your spreadsheet here or click to browse.</p>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-slate-200 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                   Supported: XLSX, XLS, CSV
                 </div>
@@ -484,14 +484,14 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
                 <Upload className="w-10 h-10 text-slate-900 animate-bounce" />
                 <div className="absolute inset-0 border-4 border-[#B7F000] border-t-transparent rounded-full animate-spin"></div>
               </div>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-4 uppercase">Ingesting Data...</h3>
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-4 uppercase">Uploading File...</h3>
               <div className="w-full bg-slate-100 rounded-full h-3 mb-6 overflow-hidden">
                 <div 
                   className="bg-[#B7F000] h-full rounded-full transition-all duration-500 shadow-[0_0_15px_rgba(183,240,0,0.5)]"
                   style={{ width: `${uploadSession.progress}%` }}
                 ></div>
               </div>
-              <p className="text-slate-900 font-black text-[10px] uppercase tracking-widest">{uploadSession.progress}% Protocol Complete</p>
+              <p className="text-slate-900 font-black text-[10px] uppercase tracking-widest">{uploadSession.progress}% Uploaded</p>
             </div>
           </div>
         )}
@@ -503,8 +503,8 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
                 <AlertCircle className="w-10 h-10 text-[#B7F000] animate-pulse" />
                 <div className="absolute inset-0 border-4 border-[#B7F000]/30 border-t-[#B7F000] rounded-full animate-spin"></div>
               </div>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2 uppercase">Analyzing Payload</h3>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Decoding spreadsheet logic and validating asset parameters.</p>
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2 uppercase">Checking Your File</h3>
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Reviewing rows and checking product details.</p>
             </div>
           </div>
         )}
@@ -515,13 +515,13 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
               <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-8 border border-red-100">
                 <XCircle className="w-10 h-10 text-red-500" />
               </div>
-              <h3 className="text-2xl font-black text-red-900 tracking-tight mb-4 uppercase">Ingress Failed</h3>
+              <h3 className="text-2xl font-black text-red-900 tracking-tight mb-4 uppercase">Upload Failed</h3>
               <p className="text-red-600 font-bold uppercase tracking-widest text-[10px] mb-12 leading-relaxed">{uploadSession.error}</p>
               <button
                 onClick={() => setUploadSession(null)}
                 className="px-10 py-4 bg-slate-900 text-[#B7F000] rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-2xl transition-all"
               >
-                Retry Protocol
+                Try Again
               </button>
             </div>
           </div>
@@ -535,11 +535,11 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
                   <CheckCircle className="w-8 h-8 text-[#B7F000]" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Ingress Success</h3>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Upload Complete</h3>
                   <p className="text-slate-900/60 text-[10px] font-bold uppercase tracking-widest">
                     {importResult ? 
-                      `${importResult.successful} Assets Committed • ${importResult.failed} Failures` :
-                      `${extractedProducts.length} Assets Staged for Review`
+                      `${importResult.successful} Products Ready • ${importResult.failed} With Issues` :
+                      `${extractedProducts.length} Products Ready To Review`
                     }
                   </p>
                 </div>
@@ -560,7 +560,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
 
             <div className="bg-white rounded-[32px] border border-slate-200 overflow-hidden">
               <div className="p-6 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Staged Assets</h4>
+                <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Products Ready To Add</h4>
                 <span className="px-3 py-1 bg-slate-900 text-[#B7F000] text-[9px] font-black rounded-full uppercase tracking-widest">
                   {extractedProducts.length} Items
                 </span>
@@ -602,14 +602,14 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
                 onClick={onCancel}
                 className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-all"
               >
-                Abort Protocol
+                Cancel
               </button>
               <button
                 onClick={handleConfirmImport}
                 className="px-10 py-5 bg-[#B7F000] hover:bg-[#A3D900] text-[#020617] rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_12px_40px_rgba(183,240,0,0.3)] hover:shadow-[0_15px_50px_rgba(183,240,0,0.4)] hover:-translate-y-1 transition-all flex items-center gap-3"
               >
                 <CheckCircle className="w-5 h-5" />
-                Commit {extractedProducts.length} Assets
+                Add {extractedProducts.length} Products
               </button>
             </div>
           </div>
@@ -619,7 +619,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onProductsExtracted, onCancel
           <div className="bg-red-50 border border-red-100 rounded-[32px] p-8 mt-12 animate-in slide-in-from-top-4 relative z-10">
             <h4 className="font-black text-red-900 uppercase tracking-widest text-[10px] mb-4 flex items-center gap-3">
               <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
-              Ingress Errors Detected
+               Problems Found
             </h4>
             <ul className="text-[10px] text-red-600 space-y-2 font-black uppercase tracking-widest">
               {errors.map((error, index) => (

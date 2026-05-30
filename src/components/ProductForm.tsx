@@ -141,7 +141,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      setGeneralError('Please fix the errors before submitting.');
+      setGeneralError('Please fix the highlighted fields before saving.');
       setIsSubmitting(false);
       return;
     }
@@ -167,7 +167,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         }
       }
     } catch (err: any) {
-      setGeneralError(err?.message || 'Failed to save product. Please try again.');
+      setGeneralError(err?.message || 'Could not save this product. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -263,7 +263,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   }, []);
 
   const handleAddCategory = async () => {
-    const name = window.prompt('Enter new category name');
+    const name = window.prompt('Enter a new category name');
     if (!name || !name.trim()) return;
     const clean = name.trim();
     try {
@@ -278,12 +278,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
         console.error('Backend category creation failed:', e);
       }
     } catch (e: any) {
-      alert(e?.message || 'Failed to create category');
+      alert(e?.message || 'Could not create that category');
     }
   };
 
   const handleAddSupplier = async () => {
-    const name = window.prompt('Enter new supplier name');
+    const name = window.prompt('Enter a new supplier name');
     if (!name || !name.trim()) return;
     const clean = name.trim();
     try {
@@ -298,16 +298,16 @@ const ProductForm: React.FC<ProductFormProps> = ({
         console.error('Backend supplier creation failed:', e);
       }
     } catch (e: any) {
-      alert(e?.message || 'Failed to create supplier');
+      alert(e?.message || 'Could not create that supplier');
     }
   };
 
   const handleAddCurrency = async () => {
-    const code = window.prompt('Enter new currency code (e.g., EUR, GBP, CAD)');
+    const code = window.prompt('Enter a 3-letter currency code (for example: EUR, GBP, CAD)');
     if (!code || !code.trim()) return;
     const clean = code.trim().toUpperCase();
     if (clean.length !== 3) {
-      alert('Currency code must be exactly 3 characters');
+      alert('Currency code must be exactly 3 letters');
       return;
     }
     try {
@@ -316,7 +316,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       setCurrencyOptions(updated);
       setCurrency(clean);
     } catch (e: any) {
-      alert(e?.message || 'Failed to add currency');
+      alert(e?.message || 'Could not add that currency');
     }
   };
 
@@ -353,7 +353,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-1">ADD PRODUCTS</h2>
                 <div className="flex items-center gap-3">
                   <span className="h-1 w-6 bg-[#B7F000] rounded-full"></span>
-                  <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Choose how to add products</p>
+                  <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Choose the easiest way to add products</p>
                 </div>
               </div>
             </div>
@@ -368,9 +368,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
           <div className="grid md:grid-cols-3 gap-6 relative z-10">
             {[
-              { id: 'manual', icon: Plus, title: 'Manual Entry', desc: 'Type details manually' },
-              { id: 'excel', icon: FileSpreadsheet, title: 'Bulk Import', desc: 'Upload many from Excel' },
-              { id: 'image', icon: Camera, title: 'Visual Scan', desc: 'Scan product labels' }
+              { id: 'manual', icon: Plus, title: 'Manual Entry', desc: 'Type in product details' },
+              { id: 'excel', icon: FileSpreadsheet, title: 'Excel Upload', desc: 'Add many products from a file' },
+              { id: 'image', icon: Camera, title: 'Photo Scan', desc: 'Use a photo to fill details' }
             ].map((option) => (
               <div 
                 key={option.id}
@@ -395,13 +395,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <div className="bg-[#B7F000] p-1.5 rounded-lg">
                 <Cpu className="w-5 h-5 text-[#020617]" />
               </div>
-              <h4 className="font-black text-white text-lg uppercase tracking-tight">System Info</h4>
+              <h4 className="font-black text-white text-lg uppercase tracking-tight">Quick Options</h4>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                'Type each product detail',
-                'Upload large Excel files',
-                'Use AI to read labels'
+                'Add one product at a time',
+                'Upload many products with Excel',
+                'Use a photo to fill in details'
               ].map((text, idx) => (
                 <div key={idx} className="flex items-start gap-3">
                   <div className="bg-[#B7F000] w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">
@@ -448,7 +448,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 <div className="flex items-center gap-2">
                   <Activity className="w-3.5 h-3.5 text-[#7AA100]" />
                   <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">
-                    {initialProduct ? 'Update product details' : 'New product information'}
+                      {initialProduct ? 'Update product details' : 'Enter product details'}
                   </p>
                 </div>
               </div>
@@ -471,7 +471,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
           <form onSubmit={handleSubmit} className="space-y-10 relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Store Node */}
+              {/* Store */}
               <div className="space-y-2.5">
                 <label className="block text-slate-400 font-black text-[10px] uppercase tracking-wider ml-1">STORE NAME</label>
                 <div className="relative group">
@@ -605,7 +605,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               </div>
 
               <div className="space-y-2.5">
-                <label className="block text-slate-400 font-black text-[10px] uppercase tracking-wider ml-1">LOW STOCK ALERT</label>
+                  <label className="block text-slate-400 font-black text-[10px] uppercase tracking-wider ml-1">LOW STOCK WARNING LEVEL</label>
                 <input
                   type="number"
                   name="minStockLevel"
@@ -781,7 +781,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     <div className="w-14 h-8 bg-slate-100 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#B7F000]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[#020617] after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#B7F000] peer-checked:after:bg-[#020617]"></div>
                   </div>
                   <span className="ml-6 text-sm font-black text-slate-900 uppercase tracking-widest group-hover/label:text-[#7AA100] transition-colors">
-                    Sync with all available stores ({userStores.length})
+                    Add this product to all stores ({userStores.length})
                   </span>
                 </label>
                 
@@ -804,7 +804,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 onClick={onCancel}
                 className="px-10 py-5 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-all"
               >
-                Terminate
+                Cancel
               </button>
               <button
                 type="submit"
@@ -812,7 +812,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 className={`px-14 py-6 ${isSubmitting ? 'bg-slate-400' : 'bg-[#B7F000] hover:bg-[#A3D900]'} text-[#020617] rounded-[24px] font-black text-sm uppercase tracking-widest transition-all shadow-[0_12px_40px_rgba(183,240,0,0.4)] hover:shadow-[0_15px_50px_rgba(183,240,0,0.5)] hover:-translate-y-2 flex items-center gap-4`}
               >
                 <Save className={`w-6 h-6 ${isSubmitting ? 'animate-pulse' : ''}`} />
-                {isSubmitting ? 'Processing...' : (initialProduct ? 'Update Registry' : 'Commit Asset')}
+                {isSubmitting ? 'Saving...' : (initialProduct ? 'Save Changes' : 'Save Product')}
               </button>
             </div>
           </form>

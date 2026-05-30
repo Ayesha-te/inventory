@@ -232,11 +232,11 @@ const ClearancePage: React.FC = () => {
     <div className="view-container">
       <div className="flex items-center justify-between mb-8 border-b-2 border-primary-gold pb-6">
         <div className="flex flex-col">
-          <h2 className="header-title" style={{ fontSize: "1.75rem" }}>Liquidation Protocols</h2>
-          <p className="header-subtitle">Strategic Asset Mark-down & Clearance Management</p>
+          <h2 className="header-title" style={{ fontSize: "1.75rem" }}>Clearance Deals</h2>
+          <p className="header-subtitle">Create discounts, fixed prices, and bundle offers for products.</p>
         </div>
         <button className="btn-primary flex items-center gap-2" onClick={() => { resetForm(); setFormOpen(true); }}>
-          <Plus className="w-4 h-4"/> Initiate Liquidation
+          <Plus className="w-4 h-4"/> New Clearance Deal
         </button>
       </div>
 
@@ -244,23 +244,23 @@ const ClearancePage: React.FC = () => {
         <form onSubmit={handleSubmit} className="card bg-primary-offwhite mb-10 space-y-6 border-l-8 border-primary-dark">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <label className="form-label">Target Asset</label>
+              <label className="form-label">Product</label>
               <select className="form-input" value={form.productId} onChange={e => setForm(prev => ({ ...prev, productId: e.target.value }))}>
-                <option value="">Select operational asset</option>
+                <option value="">Select product</option>
                 {products.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="form-label">Protocol Type</label>
+              <label className="form-label">Deal Type</label>
               <select className="form-input" value={form.type} onChange={e => setForm(prev => ({ ...prev, type: e.target.value as ClearanceType }))}>
                 {typeOptions.map(t => (
                   <option key={t.value} value={t.value}>
-                    {t.value === 'discount' ? 'Mark-down Coefficient (%)' : 
-                     t.value === 'flat' ? 'Static Valuation (Flat)' : 
-                     t.value === 'bogo' ? 'Binary Acquisition (BOGO)' : 
-                     'Asset Bundle Protocol'}
+                    {t.value === 'discount' ? 'Percentage Discount' : 
+                     t.value === 'flat' ? 'Fixed Price' : 
+                     t.value === 'bogo' ? 'Buy One Get One' : 
+                     'Bundle Deal'}
                   </option>
                 ))}
               </select>
@@ -270,11 +270,11 @@ const ClearancePage: React.FC = () => {
           {(form.type === 'discount' || form.type === 'flat') && (
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="form-label">{form.type === 'discount' ? 'Coefficient (%)' : 'Liquidation Price'}</label>
+                <label className="form-label">{form.type === 'discount' ? 'Discount (%)' : 'Clearance Price'}</label>
                 <input className="form-input" type="number" min={0} step={form.type === 'discount' ? 1 : 0.01} value={form.value ?? ''} onChange={e => setForm(prev => ({ ...prev, value: e.target.value === '' ? undefined : Number(e.target.value) }))} />
               </div>
               <div>
-                <label className="form-label">Termination Date</label>
+                <label className="form-label">End Date</label>
                 <input className="form-input" type="date" value={form.expiresAt} onChange={e => setForm(prev => ({ ...prev, expiresAt: e.target.value }))} />
               </div>
             </div>
@@ -283,15 +283,15 @@ const ClearancePage: React.FC = () => {
           {form.type === 'bogo' && (
             <div className="grid md:grid-cols-3 gap-6">
               <div>
-                <label className="form-label">Acquisition (X)</label>
+                <label className="form-label">Buy Quantity</label>
                 <input className="form-input" type="number" min={1} step={1} value={form.bogoBuyX ?? 1} onChange={e => setForm(prev => ({ ...prev, bogoBuyX: Number(e.target.value) || 1 }))} />
               </div>
               <div>
-                <label className="form-label">Allocation (Y)</label>
+                <label className="form-label">Get Quantity</label>
                 <input className="form-input" type="number" min={1} step={1} value={form.bogoGetY ?? 1} onChange={e => setForm(prev => ({ ...prev, bogoGetY: Number(e.target.value) || 1 }))} />
               </div>
               <div>
-                <label className="form-label">Termination Date</label>
+                <label className="form-label">End Date</label>
                 <input className="form-input" type="date" value={form.expiresAt} onChange={e => setForm(prev => ({ ...prev, expiresAt: e.target.value }))} />
               </div>
             </div>
@@ -301,17 +301,17 @@ const ClearancePage: React.FC = () => {
             <div className="space-y-6">
               <div className="grid md:grid-cols-3 gap-6">
                 <div>
-                  <label className="form-label">Termination Date</label>
+                  <label className="form-label">End Date</label>
                   <input className="form-input" type="date" value={form.expiresAt} onChange={e => setForm(prev => ({ ...prev, expiresAt: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="form-label">Legacy Valuation</label>
+                  <label className="form-label">Bundle Price</label>
                   <input className="form-input" type="number" min={0} step={0.01} value={form.bundlePrice ?? ''} onChange={e => setForm(prev => ({ ...prev, bundlePrice: e.target.value === '' ? undefined : Number(e.target.value) }))} />
                 </div>
                 <div>
-                  <label className="form-label">Legacy Pair</label>
+                  <label className="form-label">Bundle Product</label>
                   <select className="form-input" value={form.bundleProductId || ''} onChange={e => setForm(prev => ({ ...prev, bundleProductId: e.target.value || undefined }))}>
-                    <option value="">Select asset</option>
+                    <option value="">Select product</option>
                     {products.map(p => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
@@ -321,15 +321,15 @@ const ClearancePage: React.FC = () => {
 
               <div className="card border-2 border-dashed border-gray-300 p-6">
                 <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
-                  <div className="text-xs font-black theme-text-primary uppercase tracking-widest">Composite Bundle Matrix</div>
-                  <button type="button" className="btn-secondary" style={{ padding: "4px 12px", fontSize: "0.7rem" }} onClick={() => setForm(prev => ({ ...prev, bundleItems: [...(prev.bundleItems || []), { productId: '', quantity: 1 }] }))}>Add Component</button>
+                  <div className="text-xs font-black theme-text-primary uppercase tracking-widest">Bundle Items</div>
+                  <button type="button" className="btn-secondary" style={{ padding: "4px 12px", fontSize: "0.7rem" }} onClick={() => setForm(prev => ({ ...prev, bundleItems: [...(prev.bundleItems || []), { productId: '', quantity: 1 }] }))}>Add Item</button>
                 </div>
                 <div className="space-y-3">
                   {(form.bundleItems || []).map((bi, idx) => (
                     <div key={idx} className="grid md:grid-cols-12 gap-3 items-center">
                       <div className="md:col-span-8">
                         <select className="form-input" style={{ padding: "8px" }} value={bi.productId} onChange={e => setForm(prev => ({ ...prev, bundleItems: (prev.bundleItems || []).map((x, i) => i === idx ? { ...x, productId: e.target.value } : x) }))}>
-                          <option value="">Select asset component</option>
+                          <option value="">Select bundled product</option>
                           {products.map(p => (
                             <option key={p.id} value={p.id}>{p.name}</option>
                           ))}
@@ -349,8 +349,8 @@ const ClearancePage: React.FC = () => {
           )}
 
           <div className="flex gap-4 pt-4 border-t border-gray-100">
-            <button type="submit" className="btn-primary">{editing ? 'Commit Modification' : 'Deploy Protocol'}</button>
-            <button type="button" className="btn-secondary" onClick={() => { setFormOpen(false); resetForm(); }}>Abort</button>
+            <button type="submit" className="btn-primary">{editing ? 'Save Changes' : 'Create Deal'}</button>
+            <button type="button" className="btn-secondary" onClick={() => { setFormOpen(false); resetForm(); }}>Cancel</button>
           </div>
         </form>
       )}

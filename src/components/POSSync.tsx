@@ -10,7 +10,7 @@ interface POSSyncProps {
 const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
   // Guard: If supermarket is undefined, show a message and return
   if (!supermarket) {
-    return <div className="text-center text-[#D4AF37] font-semibold py-8">No store selected. Please add or select a store to configure POS sync.</div>;
+    return <div className="text-center text-[#D4AF37] font-semibold py-8">No store selected. Please choose a store before connecting your POS system.</div>;
   }
 
   const posSystem = supermarket.posSystem || { enabled: false, type: 'none', apiKey: '', syncEnabled: false };
@@ -28,10 +28,10 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
   });
 
   const posTypes = [
-    { value: 'none', label: 'No POS Integration', description: 'Manual inventory management only' },
-    { value: 'square', label: 'Square POS', description: 'Integrate with Square payment system' },
-    { value: 'shopify', label: 'Shopify POS', description: 'Connect with Shopify point-of-sale' },
-    { value: 'custom', label: 'Custom POS', description: 'Connect with custom POS system via API' }
+    { value: 'none', label: 'No POS Connected', description: 'Manage stock in Stockive only' },
+    { value: 'square', label: 'Square POS', description: 'Connect your Square register' },
+    { value: 'shopify', label: 'Shopify POS', description: 'Connect your Shopify register' },
+    { value: 'custom', label: 'Other POS System', description: 'Connect another store system' }
   ];
 
   const handleConfigSave = () => {
@@ -98,9 +98,9 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
             )}
           </div>
           <div className="ml-6">
-            <h2 className="text-2xl font-bold text-[#D4AF37] uppercase tracking-wide">Store Sync</h2>
+            <h2 className="text-2xl font-bold text-[#D4AF37] uppercase tracking-wide">POS Connection</h2>
             <p className="text-[#E8C547] text-sm">
-              {isConnected ? `ACTIVE LINK: ${posConfig.type.toUpperCase()}` : 'OFFLINE: NO CONNECTION'}
+              {isConnected ? `CONNECTED: ${posConfig.type.toUpperCase()}` : 'NOT CONNECTED'}
             </p>
           </div>
         </div>
@@ -108,7 +108,7 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
         <div className="flex items-center space-x-6">
           {supermarket.posSystem?.lastSync && (
             <div className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-              LAST SYNC: {new Date(supermarket.posSystem.lastSync).toLocaleDateString()}
+                LAST UPDATED: {new Date(supermarket.posSystem.lastSync).toLocaleDateString()}
             </div>
           )}
           
@@ -123,7 +123,7 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
 
       {isConfiguring && (
         <div className="bg-[#242424] mb-8 border-l-4 border-[#D4AF37] p-6 rounded-lg">
-          <h3 className="font-black text-[#D4AF37] uppercase tracking-widest text-sm mb-6 pb-2 border-b border-[#D4AF37]/20">Settings</h3>
+          <h3 className="font-black text-[#D4AF37] uppercase tracking-widest text-sm mb-6 pb-2 border-b border-[#D4AF37]/20">Connection Settings</h3>
           
           <div className="space-y-6">
             <div>
@@ -134,7 +134,7 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
                   onChange={(e) => setPosConfig({...posConfig, enabled: e.target.checked})}
                   className="mr-3 h-5 w-5 border-2 border-[#D4AF37] accent-[#D4AF37] rounded"
                 />
-                <span className="text-xs font-black text-[#D4AF37] uppercase tracking-widest group-hover:text-[#E8C547] transition-colors">Enable Sync</span>
+                  <span className="text-xs font-black text-[#D4AF37] uppercase tracking-widest group-hover:text-[#E8C547] transition-colors">Connect My POS</span>
               </label>
             </div>
 
@@ -162,13 +162,13 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
 
                 {posConfig.type !== 'none' && (
                   <div>
-                    <label className="block text-sm font-bold text-[#D4AF37] mb-2">API Key</label>
+                    <label className="block text-sm font-bold text-[#D4AF37] mb-2">Connection Key</label>
                     <input
                       type="password"
                       value={posConfig.apiKey}
                       onChange={(e) => setPosConfig({...posConfig, apiKey: e.target.value})}
                       className="w-full px-4 py-2 bg-[#1A1A1A] border-2 border-[#D4AF37]/40 rounded text-gray-300 focus:outline-none focus:border-[#D4AF37]"
-                      placeholder="ENTER API KEY"
+                      placeholder="Enter your connection key"
                     />
                   </div>
                 )}
@@ -182,10 +182,10 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
                         onChange={(e) => setPosConfig({...posConfig, syncEnabled: e.target.checked})}
                         className="mr-3 h-5 w-5 border-2 border-[#D4AF37] accent-[#D4AF37] rounded"
                       />
-                      <span className="text-xs font-black text-[#D4AF37] uppercase tracking-widest group-hover:text-[#E8C547] transition-colors">Start Auto Sync</span>
+                      <span className="text-xs font-black text-[#D4AF37] uppercase tracking-widest group-hover:text-[#E8C547] transition-colors">Keep It Updated Automatically</span>
                     </label>
                     <p className="text-[10px] font-bold text-gray-400 mt-2 ml-8 uppercase tracking-widest">
-                      Keep inventory up to date with your POS
+                      Keep products and stock updated automatically
                     </p>
                   </div>
                 )}
@@ -198,13 +198,13 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
               onClick={() => setIsConfiguring(false)}
               className="px-6 py-2 border-2 border-[#D4AF37] text-[#D4AF37] rounded font-semibold hover:bg-[#D4AF37]/10 transition-colors"
             >
-              CANCEL
+              Cancel
             </button>
             <button
               onClick={handleConfigSave}
               className="px-6 py-2 bg-[#D4AF37] text-[#0F0F0F] rounded font-semibold hover:bg-[#E8C547] transition-colors"
             >
-              SAVE SETTINGS
+              Save Changes
             </button>
           </div>
         </div>
@@ -218,12 +218,12 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
               <div className={`w-4 h-4 mr-4 ${isConnected ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-600'}`}></div>
               <div>
                 <p className="font-black text-[#D4AF37] uppercase tracking-widest text-sm">
-                  {isConnected ? 'LINK ACTIVE' : 'NO LINK'}
+                   {isConnected ? 'Connected' : 'Not Connected'}
                 </p>
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
                   {isConnected 
-                    ? `${posConfig.type.toUpperCase()} SYSTEM READY` 
-                    : 'AWAITING SETTINGS'}
+                    ? `${posConfig.type.toUpperCase()} IS READY` 
+                    : 'ADD YOUR CONNECTION DETAILS'}
                 </p>
               </div>
             </div>
@@ -235,7 +235,7 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
                 className="px-6 py-2 bg-[#D4AF37] text-[#0F0F0F] rounded font-semibold flex items-center hover:bg-[#E8C547] transition-colors disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 mr-3 ${isSyncing ? 'animate-spin' : ''}`} />
-                {isSyncing ? 'SYNCING...' : 'SYNC NOW'}
+                  {isSyncing ? 'UPDATING...' : 'SYNC NOW'}
               </button>
             )}
           </div>
@@ -245,7 +245,7 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
             <div className="p-6 bg-[#242424] border-l-4 border-[#D4AF37] rounded-lg">
               <div className="flex items-center mb-4">
                 <AlertCircle className="w-6 h-6 text-[#D4AF37] mr-3" />
-                <span className="font-black text-gray-300 uppercase tracking-widest text-xs">Syncing data...</span>
+                <span className="font-black text-gray-300 uppercase tracking-widest text-xs">Updating products and stock...</span>
               </div>
               <div className="w-full bg-[#1A1A1A] h-3 rounded-full">
                 <div 
@@ -267,17 +267,17 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
                   <XCircle className="w-6 h-6 text-red-500 mr-3" />
                 )}
                 <span className={`font-black uppercase tracking-widest text-xs ${lastSyncStatus === 'success' ? 'text-green-500' : 'text-red-500'}`}>
-                  {lastSyncStatus === 'success' ? 'SYNC SUCCESSFUL' : 'SYNC FAILED'}
+                  {lastSyncStatus === 'success' ? 'SYNC COMPLETE' : 'SYNC FAILED'}
                 </span>
               </div>
               {lastSyncStatus === 'success' && (
                 <p className="text-xs font-bold text-gray-300 mt-2 uppercase opacity-80">
-                  Inventory has been updated.
+                   Your product and stock data has been updated.
                 </p>
               )}
               {lastSyncStatus === 'error' && (
                 <p className="text-xs font-bold text-gray-300 mt-2 uppercase opacity-80">
-                  Failed to sync. Please check your settings.
+                   We could not sync right now. Please check your settings.
                 </p>
               )}
             </div>
@@ -287,7 +287,7 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
           {canSync && (
             <div className="grid md:grid-cols-2 gap-6">
               <div className="p-6 bg-[#242424] border-t-4 border-[#D4AF37] rounded-lg">
-                <h4 className="font-black text-[#D4AF37] uppercase tracking-widest text-xs mb-4">What gets synced:</h4>
+                <h4 className="font-black text-[#D4AF37] uppercase tracking-widest text-xs mb-4">What gets updated:</h4>
                 <ul className="text-[10px] font-bold text-gray-400 space-y-2 uppercase">
                   <li className="flex gap-2"><span className="text-[#D4AF37]">•</span> STOCK LEVELS</li>
                   <li className="flex gap-2"><span className="text-[#D4AF37]">•</span> PRICE UPDATES</li>
@@ -297,7 +297,7 @@ const POSSync: React.FC<POSSyncProps> = ({ supermarket, onUpdatePOS }) => {
               </div>
               
               <div className="p-6 bg-[#242424] border-t-4 border-[#D4AF37] rounded-lg">
-                <h4 className="font-black text-[#D4AF37] uppercase tracking-widest text-xs mb-4">Tips:</h4>
+                <h4 className="font-black text-[#D4AF37] uppercase tracking-widest text-xs mb-4">Helpful tips:</h4>
                 <ul className="text-[10px] font-bold text-gray-400 space-y-2 uppercase">
                   <li className="flex gap-2"><span className="text-[#D4AF37]">•</span> SYNC WHEN STORE IS NOT BUSY</li>
                   <li className="flex gap-2"><span className="text-[#D4AF37]">•</span> BACKUP BEFORE SYNC</li>
