@@ -30,12 +30,12 @@ import type { Product, User, Supermarket } from './types/Product';
 const AppContent: React.FC = () => {
   const { user, isAuthenticated, isLoading, login, logout, register } = useAuth();
   const [currentView, setCurrentView] = useState<'dashboard' | 'scanner' | 'add-product' | 'stores' | 'catalog' | 'analytics' | 'pos-sync' | 'settings' | 'barcode-demo' | 'suppliers' | 'clearance' | 'orders' | 'multi-channel-orders' | 'help' | 'login' | 'signup'>('login');
-  const [initialPlan, setInitialPlan] = useState<string>('STARTER');
+  const [initialPlan, setInitialPlan] = useState<string>('BASIC');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [selectedForBT, setSelectedForBT] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [authNotice, setAuthNotice] = useState('');
-  const resolvePlan = () => normalizePlanName((user as any)?.subscription_plan || (user as any)?.subscription?.plan || 'STARTER');
+  const resolvePlan = () => normalizePlanName((user as any)?.subscription_plan || (user as any)?.subscription?.plan || 'BASIC');
   const isViewAllowed = (view: typeof currentView) => {
     const requiredFeature = VIEW_TO_FEATURE_MAP[view];
     if (!requiredFeature) return true;
@@ -112,7 +112,7 @@ const AppContent: React.FC = () => {
         address: address || '',
         company_name: supermarketName,
         supermarket_name: supermarketName,
-        subscription_plan: normalizePlanName(subscriptionPlan || 'STARTER')
+        subscription_plan: normalizePlanName(subscriptionPlan || 'BASIC')
       };
       
       console.log('Registering user:', userData);

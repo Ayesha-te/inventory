@@ -94,7 +94,7 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [supermarketName, setSupermarketName] = useState('');
-  const [subscriptionPlan, setSubscriptionPlan] = useState(normalizePlanName(initialPlan || 'STARTER'));
+  const [subscriptionPlan, setSubscriptionPlan] = useState(normalizePlanName(initialPlan || 'BASIC'));
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [error, setError] = useState(''); // general/non-field error
@@ -102,7 +102,7 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setSubscriptionPlan(normalizePlanName(initialPlan || 'STARTER'));
+    setSubscriptionPlan(normalizePlanName(initialPlan || 'BASIC'));
   }, [initialPlan]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -299,8 +299,7 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
                   onChange={e => setSubscriptionPlan(normalizePlanName(e.target.value))}
                   className="form-input"
                 >
-                  <option value="STARTER">{PLAN_LABELS.STARTER}</option>
-                  <option value="BASIC">Basic</option>
+                  <option value="BASIC">{PLAN_LABELS.BASIC}</option>
                   <option value="STANDARD">{PLAN_LABELS.STANDARD}</option>
                   <option value="PREMIUM">{PLAN_LABELS.PREMIUM}</option>
                 </select>

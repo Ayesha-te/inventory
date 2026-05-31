@@ -50,7 +50,7 @@ function App() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedForBT, setSelectedForBT] = useState<string[]>([]);
-  const [initialPlan, setInitialPlan] = useState<string>('STARTER');
+  const [initialPlan, setInitialPlan] = useState<string>('BASIC');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeModalContent, setUpgradeModalContent] = useState({ featureName: '', requiredPlan: '' });
 
@@ -70,7 +70,7 @@ function App() {
   };
 
   const handleViewChange = (view: View) => {
-    const rawPlan = currentUser?.subscription?.plan || 'STARTER';
+    const rawPlan = currentUser?.subscription?.plan || 'BASIC';
     const plan = normalizePlanName(rawPlan);
     const { allowed } = isViewAllowed(view, plan);
   
@@ -120,7 +120,7 @@ function App() {
           registrationDate: response.user.registration_date?.split('T')[0] || new Date().toISOString().split('T')[0],
           isVerified: response.user.is_verified || false,
           subscription: {
-            plan: normalizePlanName(response.user.subscription_plan || 'STARTER'),
+            plan: normalizePlanName(response.user.subscription_plan || 'BASIC'),
             expiryDate: response.user.subscription_end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
           }
         };
@@ -147,7 +147,7 @@ function App() {
         address: address || '',
         company_name: supermarketName || '',
         supermarket_name: supermarketName || '',
-        subscription_plan: normalizePlanName(subscriptionPlan || 'STARTER')
+        subscription_plan: normalizePlanName(subscriptionPlan || 'BASIC')
       };
 
       const response = await AuthService.register(registrationData);
@@ -160,7 +160,7 @@ function App() {
           registrationDate: response.user.registration_date?.split('T')[0] || new Date().toISOString().split('T')[0],
           isVerified: response.user.is_verified || false,
           subscription: {
-            plan: normalizePlanName(response.user.subscription_plan || 'STARTER'),
+            plan: normalizePlanName(response.user.subscription_plan || 'BASIC'),
             expiryDate: response.user.subscription_end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
           }
         };
@@ -440,15 +440,15 @@ function App() {
 
   // Store Management
   const addSupermarket = async (supermarket: Omit<Supermarket, 'id'>) => {
-    const plan = normalizePlanName(currentUser?.subscription?.plan || 'STARTER');
+    const plan = normalizePlanName(currentUser?.subscription?.plan || 'BASIC');
     const currentStoreCount = supermarkets.length;
 
-    if ((plan === 'STARTER' || plan === 'BASIC') && currentStoreCount >= 1) {
-      alert(`Your ${plan === 'STARTER' ? 'Starter' : 'Basic'} plan allows for only 1 store. Please upgrade to add more stores.`);
+    if (plan === 'BASIC' && currentStoreCount >= 1) {
+      alert('Your Basic plan allows for only 1 store. Please upgrade to add more stores.');
       return;
     }
-    if (plan === 'STANDARD' && currentStoreCount >= 5) {
-      alert('Your Standard plan allows for up to 5 stores. Please upgrade to add more stores.');
+    if (plan === 'STANDARD' && currentStoreCount >= 3) {
+      alert('Your Starter plan allows for up to 3 stores. Please upgrade to add more stores.');
       return;
     }
 

@@ -73,7 +73,7 @@ export const getNavigationItems = (
   const rawPlan =
     (currentUser as any)?.subscription?.plan ||
     (currentUser as any)?.subscription_plan ||
-    'STARTER';
+    'BASIC';
   const plan = normalizePlanName(rawPlan);
   const userFeatures = getAllFeaturesForPlan(plan);
 

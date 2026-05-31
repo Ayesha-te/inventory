@@ -1,47 +1,43 @@
-export const PLAN_ORDER = ['STARTER', 'BASIC', 'STANDARD', 'PREMIUM'] as const;
+export const PLAN_ORDER = ['BASIC', 'STANDARD', 'PREMIUM'] as const;
 
 export const PLAN_LABELS: Record<string, string> = {
-  STARTER: 'Starter',
   BASIC: 'Basic',
-  STANDARD: 'Standard',
-  PREMIUM: 'Premium',
+  STARTER: 'Basic',
+  STANDARD: 'Starter',
+  PREMIUM: 'Pro',
 };
 
 export const SUBSCRIPTION_PLANS: { [key: string]: { inherits?: string; features: string[] } } = {
-  STARTER: {
+  BASIC: {
     features: [
       'single_store',
       'core_inventory',
-    ],
-  },
-  BASIC: {
-    inherits: 'STARTER',
-    features: [
       'expiry_alerts',
       'email_notifications',
-      'mobile_app_access',
+      'basic_analytics',
+      'standard_support',
     ],
   },
   STANDARD: {
     inherits: 'BASIC',
     features: [
       'store_management',
-      'unlimited_products',
+      'advanced_inventory',
       'barcode_scanner_support',
       'orders_management',
       'supplier_management',
-      'basic_analytics',
-      'standard_support',
+      'stock_level_alerts',
+      'detailed_reports',
     ],
   },
   PREMIUM: {
     inherits: 'STANDARD',
     features: [
-      'advanced_inventory',
+      'unlimited_products',
       'multi_channel_sync',
       'pos_integration',
       'advanced_analytics',
-      'api_access',
+      'clearance_tools',
       'priority_support',
     ],
   },
@@ -54,19 +50,20 @@ export const VIEW_TO_FEATURE_MAP: { [key: string]: string } = {
     'orders': 'orders_management',
     'suppliers': 'supplier_management',
     'pos-sync': 'pos_integration',
-    'clearance': 'advanced_analytics',
+    'clearance': 'clearance_tools',
     'multi-channel-orders': 'multi_channel_sync',
     'analytics': 'basic_analytics',
 };
 
 export const LEGACY_PLAN_ALIASES: Record<string, string> = {
-  FREE: 'STARTER',
+  FREE: 'BASIC',
+  STARTER: 'BASIC',
   OTHER: 'PREMIUM',
   PRO: 'PREMIUM',
 };
 
 export function normalizePlanName(plan?: string | null): string {
-  const normalized = String(plan || 'STARTER').toUpperCase();
+  const normalized = String(plan || 'BASIC').toUpperCase();
   return LEGACY_PLAN_ALIASES[normalized] || normalized;
 }
 
@@ -97,5 +94,5 @@ export function getRequiredPlanForFeature(feature: string): string {
     }
   }
 
-  return PLAN_LABELS.STARTER;
+  return PLAN_LABELS.BASIC;
 }
