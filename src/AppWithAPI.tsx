@@ -23,7 +23,7 @@ import HelpPage from './components/HelpPage';
 import logoImage from './assets/logo.png';
 
 import { analyzeStoreContext, getNavigationItems } from './utils/storeUtils';
-import { VIEW_TO_FEATURE_MAP, getAllFeaturesForPlan, getPlanLabel, getRequiredPlanForFeature, normalizePlanName } from './config/plans';
+import { VIEW_TO_FEATURE_MAP, getAllFeaturesForPlan, getMaxStoresForPlan, getPlanLabel, getRequiredPlanForFeature, normalizePlanName } from './config/plans';
 import type { Product, User, Supermarket } from './types/Product';
 
 // Main App Content Component
@@ -360,6 +360,9 @@ const AppContent: React.FC = () => {
   // Get store context and adaptive navigation
   const storeContext = analyzeStoreContext((supermarkets || []) as Supermarket[], user as User);
   const navigationItems = getNavigationItems(storeContext, isAuthenticated, user as User);
+  const currentPlanName = resolvePlan();
+  const currentPlanLabel = getPlanLabel(currentPlanName);
+  const maxStoresForPlan = getMaxStoresForPlan(currentPlanName);
   
   // Small helper to allow in-app links to switch tabs
   const navigate = (viewId: typeof currentView) => handleViewChange(viewId);
@@ -485,6 +488,12 @@ const AppContent: React.FC = () => {
         {currentView === 'stores' && user && (
           <MyStores 
             stores={supermarkets || []}
+            canAddBranch={maxStoresForPlan === null || (supermarkets || []).length < maxStoresForPlan}
+            storeLimitMessage={
+              maxStoresForPlan === null
+                ? ''
+                : `${currentPlanLabel} plan allows up to ${maxStoresForPlan} store${maxStoresForPlan === 1 ? '' : 's'}.`
+            }
             onNavigateToStore={(storeId: string) => {
               try {
                 if (typeof window !== 'undefined') {

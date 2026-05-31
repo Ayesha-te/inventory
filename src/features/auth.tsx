@@ -300,8 +300,8 @@ const Auth: React.FC<AuthProps> = ({ mode, onAuthSuccess, showSignupOption, show
                   className="form-input"
                 >
                   <option value="BASIC">{PLAN_LABELS.BASIC}</option>
-                  <option value="STANDARD">{PLAN_LABELS.STANDARD}</option>
-                  <option value="PREMIUM">{PLAN_LABELS.PREMIUM}</option>
+                  <option value="STARTER">{PLAN_LABELS.STARTER}</option>
+                  <option value="PRO">{PLAN_LABELS.PRO}</option>
                 </select>
                   <p className="mt-1 text-[10px] theme-text-muted font-bold uppercase tracking-wider">
                     Choose the plan that fits your store

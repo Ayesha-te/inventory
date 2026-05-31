@@ -160,7 +160,7 @@ export const getNavigationItems = (
       id: 'clearance',
       label: 'Clearance',
       icon: '🏷️',
-      feature: 'advanced_analytics',
+      feature: 'clearance_tools',
     },
     {
       id: 'multi-channel-orders',

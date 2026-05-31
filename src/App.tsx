@@ -34,7 +34,7 @@ import { getSuppliersWithFallback } from './data/demoData';
 import DebugStoreInfo from './components/DebugStoreInfo';
 import UpgradeModal from './components/UpgradeModal';
 import type { Product, Supermarket, User } from './types/Product';
-import { getAllFeaturesForPlan, getRequiredPlanForFeature, VIEW_TO_FEATURE_MAP, normalizePlanName } from './config/plans';
+import { getAllFeaturesForPlan, getMaxStoresForPlan, getPlanLabel, getRequiredPlanForFeature, VIEW_TO_FEATURE_MAP, normalizePlanName } from './config/plans';
 
 
 type View = 'dashboard' | 'supermarket-overview' | 'scanner' | 'add-product' | 'stores' | 'catalog' | 'analytics' | 'pos-sync' | 'settings' | 'barcode-demo' | 'suppliers' | 'purchase-orders' | 'purchasing-reports' | 'clearance' | 'multi-channel-orders' | 'channel-management' | 'stock-management' | 'warehouse-management' | 'login' | 'signup';
@@ -442,13 +442,11 @@ function App() {
   const addSupermarket = async (supermarket: Omit<Supermarket, 'id'>) => {
     const plan = normalizePlanName(currentUser?.subscription?.plan || 'BASIC');
     const currentStoreCount = supermarkets.length;
+    const maxStores = getMaxStoresForPlan(plan);
+    const planLabel = getPlanLabel(plan);
 
-    if (plan === 'BASIC' && currentStoreCount >= 1) {
-      alert('Your Basic plan allows for only 1 store. Please upgrade to add more stores.');
-      return;
-    }
-    if (plan === 'STANDARD' && currentStoreCount >= 3) {
-      alert('Your Starter plan allows for up to 3 stores. Please upgrade to add more stores.');
+    if (maxStores !== null && currentStoreCount >= maxStores) {
+      alert(`Your ${planLabel} plan allows for up to ${maxStores} store${maxStores === 1 ? '' : 's'}. Please upgrade to add more stores.`);
       return;
     }
 
@@ -579,6 +577,9 @@ function App() {
 
   // Get user's primary store
   const primaryStore = supermarkets.find(s => !s.isSubStore && s.ownerId === currentUser?.id) || supermarkets[0];
+  const currentPlanName = normalizePlanName(currentUser?.subscription?.plan || 'BASIC');
+  const currentPlanLabel = getPlanLabel(currentPlanName);
+  const maxStoresForPlan = getMaxStoresForPlan(currentPlanName);
 
   if (isAuthenticated) {
     return (
@@ -698,7 +699,16 @@ function App() {
           )}
 
           {currentView === 'stores' && currentUser && (
-            <MyStores stores={supermarkets} onNavigateToStore={handleNavigateToStore} />
+            <MyStores
+              stores={supermarkets}
+              onNavigateToStore={handleNavigateToStore}
+              canAddBranch={maxStoresForPlan === null || supermarkets.length < maxStoresForPlan}
+              storeLimitMessage={
+                maxStoresForPlan === null
+                  ? ''
+                  : `${currentPlanLabel} plan allows up to ${maxStoresForPlan} store${maxStoresForPlan === 1 ? '' : 's'}.`
+              }
+            />
           )}
 
           {currentView === 'pos-sync' && (

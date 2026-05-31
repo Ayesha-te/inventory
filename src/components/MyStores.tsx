@@ -18,9 +18,17 @@ interface MyStoresProps {
   stores: Supermarket[];
   onNavigateToStore: (storeId: string) => void;
   onStoreCreated?: (store: any) => void;
+  canAddBranch?: boolean;
+  storeLimitMessage?: string;
 }
 
-const MyStores: React.FC<MyStoresProps> = ({ stores, onNavigateToStore, onStoreCreated }) => {
+const MyStores: React.FC<MyStoresProps> = ({
+  stores,
+  onNavigateToStore,
+  onStoreCreated,
+  canAddBranch = true,
+  storeLimitMessage = '',
+}) => {
   const mainStores = useMemo(() => stores.filter((store) => !store.isSubStore), [stores]);
   const subStores = useMemo(() => stores.filter((store) => store.isSubStore), [stores]);
   const verifiedStores = useMemo(() => stores.filter((store) => store.isVerified).length, [stores]);
@@ -88,12 +96,20 @@ const MyStores: React.FC<MyStoresProps> = ({ stores, onNavigateToStore, onStoreC
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Store network</p>
             <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-900">My Stores</h2>
             <p className="mt-2 text-sm text-slate-500">Manage your main store and branch stores from one place.</p>
+            {storeLimitMessage && (
+              <p className="mt-2 text-sm font-medium text-slate-600">{storeLimitMessage}</p>
+            )}
           </div>
 
           <button
             type="button"
-            onClick={() => setShowAdd(true)}
-            className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            onClick={() => {
+              if (canAddBranch) {
+                setShowAdd(true);
+              }
+            }}
+            disabled={!canAddBranch}
+            className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
           >
             <Plus className="h-4 w-4" />
             Add Branch

@@ -1,10 +1,21 @@
-export const PLAN_ORDER = ['BASIC', 'STANDARD', 'PREMIUM'] as const;
+export const PLAN_ORDER = ['BASIC', 'STARTER', 'PRO'] as const;
 
 export const PLAN_LABELS: Record<string, string> = {
   BASIC: 'Basic',
-  STARTER: 'Basic',
-  STANDARD: 'Starter',
-  PREMIUM: 'Pro',
+  STARTER: 'Starter',
+  PRO: 'Pro',
+};
+
+export const PLAN_LIMITS: Record<string, { maxStores: number | null }> = {
+  BASIC: {
+    maxStores: 1,
+  },
+  STARTER: {
+    maxStores: 3,
+  },
+  PRO: {
+    maxStores: null,
+  },
 };
 
 export const SUBSCRIPTION_PLANS: { [key: string]: { inherits?: string; features: string[] } } = {
@@ -18,7 +29,7 @@ export const SUBSCRIPTION_PLANS: { [key: string]: { inherits?: string; features:
       'standard_support',
     ],
   },
-  STANDARD: {
+  STARTER: {
     inherits: 'BASIC',
     features: [
       'store_management',
@@ -30,8 +41,8 @@ export const SUBSCRIPTION_PLANS: { [key: string]: { inherits?: string; features:
       'detailed_reports',
     ],
   },
-  PREMIUM: {
-    inherits: 'STANDARD',
+  PRO: {
+    inherits: 'STARTER',
     features: [
       'unlimited_products',
       'multi_channel_sync',
@@ -57,9 +68,9 @@ export const VIEW_TO_FEATURE_MAP: { [key: string]: string } = {
 
 export const LEGACY_PLAN_ALIASES: Record<string, string> = {
   FREE: 'BASIC',
-  STARTER: 'BASIC',
-  OTHER: 'PREMIUM',
-  PRO: 'PREMIUM',
+  STANDARD: 'STARTER',
+  PREMIUM: 'PRO',
+  OTHER: 'PRO',
 };
 
 export function normalizePlanName(plan?: string | null): string {
@@ -95,4 +106,9 @@ export function getRequiredPlanForFeature(feature: string): string {
   }
 
   return PLAN_LABELS.BASIC;
+}
+
+export function getMaxStoresForPlan(plan?: string | null): number | null {
+  const normalizedPlan = normalizePlanName(plan);
+  return PLAN_LIMITS[normalizedPlan]?.maxStores ?? PLAN_LIMITS.BASIC.maxStores;
 }

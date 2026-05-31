@@ -61,17 +61,11 @@ interface UserInterface {
   phone?: string;
   subscription?: {
     plan:
-      | 'STARTER'
       | 'BASIC'
-      | 'STANDARD'
-      | 'PREMIUM'
-      | 'OTHER'
+      | 'STARTER'
       | 'PRO'
-      | 'starter'
       | 'basic'
-      | 'standard'
-      | 'premium'
-      | 'other'
+      | 'starter'
       | 'pro';
     expiryDate?: string;
   };
